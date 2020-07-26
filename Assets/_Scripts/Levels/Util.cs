@@ -14,6 +14,12 @@ namespace myd.celeste
         public static string GAME_PATH = "F:/steam/steamapps/common/Celeste/";
 
         public static Rand Random = new Rand();
+
+        public static float ClampedMap(float val, float min, float max, float newMin = 0.0f, float newMax = 1f)
+        {
+            return Mathf.Clamp((float)(((double)val - (double)min) / ((double)max - (double)min)), 0.0f, 1f) * (newMax - newMin) + newMin;
+        }
+
         public static int Clamp(int value, int min, int max)
         {
             return Math.Min(Math.Max(value, min), max);
@@ -170,6 +176,24 @@ namespace myd.celeste
             }
         }
 
+        public static Vector2 ClosestTo(this List<Vector2> list, Vector2 to)
+        {
+            Vector2 vector2 = list[0];
+            //float num1 = Vector2.DistanceSquared(list[0], to);
+            float num1 = (list[0] - to).SqrMagnitude();
+            for (int index = 1; index < list.Count; ++index)
+            {
+                //float num2 = Vector2.DistanceSquared(list[index], to);
+                float num2 = (list[index]-to).SqrMagnitude();
+                if ((double)num2 < (double)num1)
+                {
+                    num1 = num2;
+                    vector2 = list[index];
+                }
+            }
+            return vector2;
+        }
+
         public static void CopyTo(Texture2D dest, Texture2D src, Vector2 pos)
         {
             //if (src != null)
@@ -182,5 +206,7 @@ namespace myd.celeste
             //    }
             //}
         }
+
+
     }
 }

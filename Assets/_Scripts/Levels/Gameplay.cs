@@ -207,10 +207,10 @@ namespace myd.celeste
                 if (!levelBounds.IntersectsWith(viewport)) { continue; }
 
                 TileGrid tiles = foreground.GenerateOverlay(DefaultTile, 0, 0, width, height, null);
-                using (Bitmap map = tiles.DisplayMap(null, null, chapterBounds, false))
-                {
-                    Util.CopyTo(chapter, map, pos);
-                }
+                //using (Bitmap map = tiles.DisplayMap(null, null, chapterBounds, false))
+                //{
+                //    Util.CopyTo(chapter, map, pos);
+                //}
             }
             return chapter;
         }
