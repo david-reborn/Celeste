@@ -4,12 +4,54 @@ using System.Reflection;
 using System.IO;
 using System;
 using System.Xml;
+using System.Collections.Generic;
 
 namespace myd.celeste
 {
     public static class Util
     {
         public static string ROOT = "F:/Unity/Celeste/Resources/";
+        public static string GAME_PATH = "F:/steam/steamapps/common/Celeste/";
+
+        public static Rand Random = new Rand();
+        public static int Clamp(int value, int min, int max)
+        {
+            return Math.Min(Math.Max(value, min), max);
+        }
+        public static float Clamp(float value, float min, float max)
+        {
+            return Math.Min(Math.Max(value, min), max);
+        }
+
+        public static T Choose<T>(this Rand random, T a, T b)
+        {
+            return GiveMe<T>(random.Next(2), a, b);
+        }
+        public static T Choose<T>(this Rand random, T a, T b, T c)
+        {
+            return GiveMe<T>(random.Next(3), a, b, c);
+        }
+        public static T Choose<T>(this Rand random, T a, T b, T c, T d)
+        {
+            return GiveMe<T>(random.Next(4), a, b, c, d);
+        }
+        public static T Choose<T>(this Rand random, T a, T b, T c, T d, T e)
+        {
+            return GiveMe<T>(random.Next(5), a, b, c, d, e);
+        }
+        public static T Choose<T>(this Rand random, T a, T b, T c, T d, T e, T f)
+        {
+            return GiveMe<T>(random.Next(6), a, b, c, d, e, f);
+        }
+        public static T Choose<T>(this Rand random, params T[] choices)
+        {
+            return choices[random.Next(choices.Length)];
+        }
+        public static T Choose<T>(this Rand random, List<T> choices)
+        {
+            return choices[random.Next(choices.Count)];
+        }
+
         public static string Attr(this XmlElement xml, string attributeName)
         {
             return xml.Attributes[attributeName]?.InnerText;
@@ -33,10 +75,9 @@ namespace myd.celeste
 
         public static string ReadResource(string path)
         {
-            Assembly current = Assembly.GetExecutingAssembly();
-            using (Stream file = current.GetManifestResourceStream(current.GetName().Name + "." + path))
+            using (FileStream stream = new FileStream(ROOT + path, FileMode.Open))
             {
-                using (StreamReader sr = new StreamReader(file))
+                using (StreamReader sr = new StreamReader(stream))
                 {
                     return sr.ReadToEnd();
                 }
@@ -46,6 +87,100 @@ namespace myd.celeste
         public static Sprite GetSubImage(Texture2D parent, ExtSprite bounds)
         {
             return Sprite.Create(parent, bounds.Bounds, new Vector2(0.5f, 0.5f));
+        }
+
+        public static Sprite GetSubImage(Sprite parent, ExtSprite bounds)
+        {
+            return Sprite.Create(parent.texture, bounds.Bounds, new Vector2(0.5f, 0.5f));
+        }
+
+
+
+        public static Color HexToColor(string hex)
+        {
+            if (hex.Length >= 6)
+            {
+                int r = HexToByte(hex[0]) * 16 + HexToByte(hex[1]);
+                int g = HexToByte(hex[2]) * 16 + HexToByte(hex[3]);
+                int b = HexToByte(hex[4]) * 16 + HexToByte(hex[5]);
+                return new Color(r, g, b);
+            }
+            return Color.white;
+        }
+        public static byte HexToByte(char c)
+        {
+            return (byte)"0123456789ABCDEF".IndexOf(char.ToUpper(c));
+        }
+        public static T GiveMe<T>(int index, T a, T b)
+        {
+            if (index == 0)
+            {
+                return a;
+            }
+            if (index != 1)
+            {
+                throw new Exception("Index was out of range!");
+            }
+            return b;
+        }
+        public static T GiveMe<T>(int index, T a, T b, T c)
+        {
+            switch (index)
+            {
+                case 0: return a;
+                case 1: return b;
+                case 2: return c;
+                default: throw new Exception("Index was out of range!");
+            }
+        }
+        public static T GiveMe<T>(int index, T a, T b, T c, T d)
+        {
+            switch (index)
+            {
+                case 0: return a;
+                case 1: return b;
+                case 2: return c;
+                case 3: return d;
+                default: throw new Exception("Index was out of range!");
+            }
+        }
+        public static T GiveMe<T>(int index, T a, T b, T c, T d, T e)
+        {
+            switch (index)
+            {
+                case 0: return a;
+                case 1: return b;
+                case 2: return c;
+                case 3: return d;
+                case 4: return e;
+                default: throw new Exception("Index was out of range!");
+            }
+        }
+        public static T GiveMe<T>(int index, T a, T b, T c, T d, T e, T f)
+        {
+            switch (index)
+            {
+                case 0: return a;
+                case 1: return b;
+                case 2: return c;
+                case 3: return d;
+                case 4: return e;
+                case 5: return f;
+                default: throw new Exception("Index was out of range!");
+            }
+        }
+
+        public static void CopyTo(Texture2D dest, Texture2D src, Vector2 pos)
+        {
+            //if (src != null)
+            //{
+            //    byte[] srcData = src.GetRawTextureData();
+            //    dest.LoadRawTextureData();
+            //    using (Graphics g = Graphics.FromImage(dest))
+            //    {
+            //        g.DrawImage(src, pos);
+            //    }
+            //}
         }
     }
 }

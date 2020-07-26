@@ -9,7 +9,7 @@ namespace myd.celeste
         public Rect Bounds, Offset;
         public ExtSprite(int x, int y, int width, int height, int offsetX, int offsetY, int widthOffset, int heightOffset)
         {
-            Bounds = new Rect(x, y, width, height);
+            Bounds = new Rect(x, 4096 - y - heightOffset - offsetY, width, height);
             Offset = new Rect(-offsetX, -offsetY, widthOffset, heightOffset);
         }
         public override string ToString()
