@@ -122,10 +122,10 @@ namespace myd.celeste
                         this.SetFlag(flag, true);
                 }
             }
-            if (oldStats != null)
-                this.OldStats = oldStats;
-            else
-                this.OldStats = SaveData.Instance.Areas[this.Area.ID].Clone();
+            //if (oldStats != null)
+            //    this.OldStats = oldStats;
+            //else
+            //    this.OldStats = SaveData.Instance.Areas[this.Area.ID].Clone();
         }
 
         public LevelData LevelData
@@ -148,7 +148,7 @@ namespace myd.celeste
         {
             get
             {
-                return this.Area.Mode == AreaMode.Normal && !this.OldStats.Modes[0].Completed && this.Area.ID < SaveData.Instance.MaxArea;
+                return this.Area.Mode == AreaMode.Normal; //&& !this.OldStats.Modes[0].Completed && this.Area.ID < SaveData.Instance.MaxArea;
             }
         }
 

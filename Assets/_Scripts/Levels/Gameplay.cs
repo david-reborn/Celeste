@@ -55,6 +55,10 @@ namespace myd.celeste
             {
                 GenerateMap();
             }
+            if (Input.GetKeyUp(KeyCode.S))
+            {
+
+            }
         }
 
         /// <summary>

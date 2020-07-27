@@ -36,7 +36,7 @@ namespace myd.celeste
         {
             get
             {
-                return Path.Combine(Util.GAME_PATH, "Maps", this.Filename + ".bin");
+                return Path.Combine(Util.GAME_PATH_CONTENT, "Maps", this.Filename + ".bin");
             }
         }
 

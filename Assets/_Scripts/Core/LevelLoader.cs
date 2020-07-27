@@ -24,17 +24,31 @@ namespace myd.celeste
                 this.startPosition = startPosition;
             }
             this.Level = new Level();
-            //RunThread.Start(new Action(this.LoadingThread), "LEVEL_LOADER", false);
             LoadingThread();
+
+            Debug.Log("LoadingThread Finished");
         }
 
         //加载关卡数据
         private void LoadingThread()
         {
-            //MapData mapData = this.session.MapData;
-            //AreaData areaData = AreaData.Get(this.session);
+            MapData mapData = this.session.MapData;
+            
+            AreaData areaData = AreaData.Get(this.session.Area.ID);
             //if (this.session.Area.ID == 0)
             //    SaveData.Instance.Assists.DashMode = Assists.DashModes.Normal;
+
+            //this.Level.Add((Entity)new DustEdges());
+            //this.Level.Add((Entity)new WaterSurface());
+            //this.Level.Add((Entity)new MirrorSurfaces());
+            //this.Level.Add((Entity)new GlassBlockBg());
+            //this.Level.Add((Entity)new LightningRenderer());
+            //this.Level.Add((Entity)new SeekerBarrierRenderer());
+
+            this.Level.BackgroundColor = mapData.BackgroundColor;
+            this.Level.Background.Backdrops = mapData.CreateBackdrops(mapData.Background);
+            foreach (Backdrop backdrop in this.Level.Background.Backdrops)
+                backdrop.Renderer = this.Level.Background;
         }
 
     }

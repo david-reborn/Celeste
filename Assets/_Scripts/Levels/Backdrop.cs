@@ -31,7 +31,7 @@ namespace myd.celeste
         public bool Visible;
         public bool InstantOut;
         public bool ForceVisible;
-        //public BackdropRenderer Renderer;
+        public BackdropRenderer Renderer;
 
         public Backdrop()
         {

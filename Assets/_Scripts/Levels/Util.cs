@@ -12,6 +12,7 @@ namespace myd.celeste
     {
         public static string ROOT = "F:/Unity/Celeste/Resources/";
         public static string GAME_PATH = "F:/steam/steamapps/common/Celeste/";
+        public static string GAME_PATH_CONTENT = "F:/steam/steamapps/common/Celeste/Content/";
 
         public static Rand Random = new Rand();
 

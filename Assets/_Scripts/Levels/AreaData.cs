@@ -2,6 +2,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using System;
+using System.Xml;
+using System.IO;
 
 namespace myd.celeste
 {
@@ -83,6 +85,46 @@ namespace myd.celeste
             areaData1.Jumpthru = "wood";
             AreaData areaData2 = areaData1;
             areas1.Add(areaData2);
+
+            int length = Enum.GetNames(typeof(AreaMode)).Length;
+            for (int id = 0; id < AreaData.Areas.Count; ++id)
+            {
+                AreaData.Areas[id].ID = id;
+                AreaData.Areas[id].Mode[0].MapData = new MapData(new AreaKey(id, AreaMode.Normal));
+                if (!AreaData.Areas[id].Interlude)
+                {
+                    for (int index = 1; index < length; ++index)
+                    {
+                        if (AreaData.Areas[id].HasMode((AreaMode)index))
+                            AreaData.Areas[id].Mode[index].MapData = new MapData(new AreaKey(id, (AreaMode)index));
+                    }
+                }
+            }
+            AreaData.ReloadMountainViews();
+        }
+
+        //加载山的全景视图
+        public static void ReloadMountainViews()
+        {
+            //foreach (XmlElement xml in (XmlNode)Util.LoadXML(Path.Combine(Engine.ContentDirectory, "Overworld", "AreaViews.xml"))["Views"])
+            //{
+            //    int index = xml.AttrInt("id");
+            //    if (index >= 0 && index < AreaData.Areas.Count)
+            //    {
+            //        Vector3 pos1 = xml["Idle"].AttrVector3("position");
+            //        Vector3 target1 = xml["Idle"].AttrVector3("target");
+            //        AreaData.Areas[index].MountainIdle = new MountainCamera(pos1, target1);
+            //        Vector3 pos2 = xml["Select"].AttrVector3("position");
+            //        Vector3 target2 = xml["Select"].AttrVector3("target");
+            //        AreaData.Areas[index].MountainSelect = new MountainCamera(pos2, target2);
+            //        Vector3 pos3 = xml["Zoom"].AttrVector3("position");
+            //        Vector3 target3 = xml["Zoom"].AttrVector3("target");
+            //        AreaData.Areas[index].MountainZoom = new MountainCamera(pos3, target3);
+            //        if (xml["Cursor"] != null)
+            //            AreaData.Areas[index].MountainCursor = xml["Cursor"].AttrVector3("position");
+            //        AreaData.Areas[index].MountainState = xml.AttrInt("state", 0);
+            //    }
+            //}
         }
 
         public static AreaData Get(int id)
@@ -119,6 +161,11 @@ namespace myd.celeste
         public static string GetCheckpointColorGrading(AreaKey area, string level)
         {
             return AreaData.GetCheckpoint(area, level)?.ColorGrade;
+        }
+
+        public bool HasMode(AreaMode mode)
+        {
+            return (AreaMode)this.Mode.Length > mode && this.Mode[(int)mode] != null && this.Mode[(int)mode].Path != null;
         }
     }
 }
