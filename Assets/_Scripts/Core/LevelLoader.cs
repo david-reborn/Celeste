@@ -37,14 +37,14 @@ namespace myd.celeste
             AreaData areaData = AreaData.Get(this.session.Area.ID);
             //if (this.session.Area.ID == 0)
             //    SaveData.Instance.Assists.DashMode = Assists.DashModes.Normal;
-
+            //this.Level.Add((Monocle.Renderer)(this.Level.Background = new BackdropRenderer()));
             //this.Level.Add((Entity)new DustEdges());
             //this.Level.Add((Entity)new WaterSurface());
             //this.Level.Add((Entity)new MirrorSurfaces());
             //this.Level.Add((Entity)new GlassBlockBg());
             //this.Level.Add((Entity)new LightningRenderer());
             //this.Level.Add((Entity)new SeekerBarrierRenderer());
-
+            this.Level.Background = new BackdropRenderer();
             this.Level.BackgroundColor = mapData.BackgroundColor;
             this.Level.Background.Backdrops = mapData.CreateBackdrops(mapData.Background);
             foreach (Backdrop backdrop in this.Level.Background.Backdrops)

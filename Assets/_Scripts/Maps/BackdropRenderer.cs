@@ -7,7 +7,7 @@ namespace myd.celeste
     /// <summary>
     /// 背景渲染器
     /// </summary>
-    public class BackdropRenderer : MonoBehaviour
+    public class BackdropRenderer 
     {
         public List<Backdrop> Backdrops = new List<Backdrop>();
         public float Fade = 0.0f;
