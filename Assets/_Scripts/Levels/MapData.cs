@@ -12,7 +12,7 @@ namespace myd.celeste
     public class MapData
     {
         public List<LevelData> Levels = new List<LevelData>();
-        public List<Rect> Filler = new List<Rect>();
+        public List<Rectangle> Filler = new List<Rectangle>();
         public List<EntityData> Strawberries = new List<EntityData>();
         public List<EntityData> Goldenberries = new List<EntityData>();
         public Color BackgroundColor = Color.black;
@@ -42,11 +42,11 @@ namespace myd.celeste
             }
         }
 
-        public Rect TileBounds
+        public Rectangle TileBounds
         {
             get
             {
-                return new Rect(this.Bounds.x / 8, this.Bounds.y / 8, (int)Math.Ceiling((double)this.Bounds.width / 8.0), (int)Math.Ceiling((double)this.Bounds.height / 8.0));
+                return new Rectangle(this.Bounds.x / 8, this.Bounds.y / 8, (int)Math.Ceiling((double)this.Bounds.width / 8.0), (int)Math.Ceiling((double)this.Bounds.height / 8.0));
             }
         }
 
@@ -125,11 +125,11 @@ namespace myd.celeste
                 }
                 else if (child1.Name == "Filler")
                 {
-                    this.Filler = new List<Rect>();
+                    this.Filler = new List<Rectangle>();
                     if (child1.Children != null)
                     {
                         foreach (BinaryPacker.Element child2 in child1.Children)
-                            this.Filler.Add(new Rect((int)child2.Attributes["x"], (int)child2.Attributes["y"], (int)child2.Attributes["w"], (int)child2.Attributes["h"]));
+                            this.Filler.Add(new Rectangle((int)child2.Attributes["x"], (int)child2.Attributes["y"], (int)child2.Attributes["w"], (int)child2.Attributes["h"]));
                     }
                 }
                 else if (child1.Name == "Style")
@@ -173,16 +173,16 @@ namespace myd.celeste
                 if (level.Bounds.bottom > num4)
                     num4 = Mathf.RoundToInt(level.Bounds.bottom);
             }
-            foreach (Rect rectangle in this.Filler)
+            foreach (Rectangle rectangle in this.Filler)
             {
-                if (rectangle.xMin < num1)
-                    num1 = Mathf.RoundToInt(rectangle.xMin);
-                if (rectangle.top < num2)
-                    num2 = Mathf.RoundToInt(rectangle.top);
-                if (rectangle.xMax > num3)
-                    num3 = Mathf.RoundToInt(rectangle.xMax);
-                if (rectangle.bottom > num4)
-                    num4 = Mathf.RoundToInt(rectangle.bottom);
+                if (rectangle.Left < num1)
+                    num1 = rectangle.Left;
+                if (rectangle.Top < num2)
+                    num2 = rectangle.Top;
+                if (rectangle.Right > num3)
+                    num3 = rectangle.Right;
+                if (rectangle.Bottom > num4)
+                    num4 = rectangle.Bottom;
             }
             int num5 = 64;
             this.Bounds = new Rect(num1 - num5, num2 - num5, num3 - num1 + num5 * 2, num4 - num2 + num5 * 2);

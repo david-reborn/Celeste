@@ -4,15 +4,50 @@ using System.Xml;
 using System;
 using myd.celeste;
 using System.IO;
+using System.Globalization;
 
 public static class XmlUtils 
 {
     public static XmlDocument LoadContentXML(string filename)
     {
         XmlDocument xmlDocument = new XmlDocument();
-        using (FileStream inStream = TitleContainer.OpenStream(Path.Combine(Engine.Instance.Content.RootDirectory, filename)))
-            xmlDocument.Load(inStream);
+        xmlDocument.Load(Path.Combine(Util.GAME_PATH_CONTENT, filename));
+        //using (FileStream inStream = TitleContainer.OpenStream(Path.Combine(Engine.Instance.Content.RootDirectory, filename)))
+        //    xmlDocument.Load(inStream);
         return xmlDocument;
+    }
+
+    public static float AttrFloat(this XmlElement xml, string attributeName)
+    {
+        return Convert.ToSingle(xml.Attributes[attributeName].InnerText, (IFormatProvider)CultureInfo.InvariantCulture);
+    }
+
+    public static float AttrFloat(this XmlElement xml, string attributeName, float defaultValue)
+    {
+        return !xml.HasAttr(attributeName) ? defaultValue : Convert.ToSingle(xml.Attributes[attributeName].InnerText, (IFormatProvider)CultureInfo.InvariantCulture);
+    }
+
+    public static Vector3 AttrVector3(this XmlElement xml, string attributeName)
+    {
+        string[] strArray = xml.Attr(attributeName).Split(',');
+        return new Vector3(float.Parse(strArray[0].Trim(), (IFormatProvider)CultureInfo.InvariantCulture), float.Parse(strArray[1].Trim(), (IFormatProvider)CultureInfo.InvariantCulture), float.Parse(strArray[2].Trim(), (IFormatProvider)CultureInfo.InvariantCulture));
+    }
+
+    public static Vector2 AttrVector2(
+      this XmlElement xml,
+      string xAttributeName,
+      string yAttributeName)
+    {
+        return new Vector2(xml.AttrFloat(xAttributeName), xml.AttrFloat(yAttributeName));
+    }
+
+    public static Vector2 AttrVector2(
+      this XmlElement xml,
+      string xAttributeName,
+      string yAttributeName,
+      Vector2 defaultValue)
+    {
+        return new Vector2(xml.AttrFloat(xAttributeName, defaultValue.x), xml.AttrFloat(yAttributeName, defaultValue.y));
     }
 
     public static bool AttrBool(this XmlElement xml, string attributeName)

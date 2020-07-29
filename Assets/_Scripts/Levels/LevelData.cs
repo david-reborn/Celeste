@@ -269,11 +269,11 @@ namespace myd.celeste
             return (double)at.x >= (double)this.Bounds.xMin && (double)at.y >= (double)this.Bounds.yMin && (double)at.x < (double)this.Bounds.xMax && (double)at.y < (double)this.Bounds.yMax;
         }
 
-        public Rect TileBounds
+        public Rectangle TileBounds
         {
             get
             {
-                return new Rect(this.Bounds.x / 8, this.Bounds.y / 8, (int)Math.Ceiling((double)this.Bounds.width / 8.0), (int)Math.Ceiling((double)this.Bounds.height / 8.0));
+                return new Rectangle(this.Bounds.x / 8, this.Bounds.y / 8, (int)Math.Ceiling((double)this.Bounds.width / 8.0), (int)Math.Ceiling((double)this.Bounds.height / 8.0));
             }
         }
 

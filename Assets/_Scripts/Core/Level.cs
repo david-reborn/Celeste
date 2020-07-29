@@ -9,7 +9,8 @@ namespace myd.celeste
     public class Level
     {
         public Color BackgroundColor = Color.black;
-
         public BackdropRenderer Background;
+
+        public BackgroundTiles BgTiles;
     }
 }

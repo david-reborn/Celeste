@@ -12,9 +12,9 @@ public class MTexture
 
     public Vector2 DrawOffset { get; private set; }
 
-    public float Width { get; private set; }
+    public int Width { get; private set; }
 
-    public float Height { get; private set; }
+    public int Height { get; private set; }
 
     public Vector2 Center { get; private set; }
 
@@ -33,8 +33,8 @@ public class MTexture
         this.Texture = texture;
         this.ClipRect = new Rect(0, 0, this.Texture.width, this.Texture.height);
         this.DrawOffset = Vector2.zero;
-        this.Width = this.ClipRect.width;
-        this.Height = this.ClipRect.height;
+        this.Width = Mathf.RoundToInt(this.ClipRect.width);
+        this.Height = Mathf.RoundToInt(this.ClipRect.height);
         this.SetUtil();
     }
 

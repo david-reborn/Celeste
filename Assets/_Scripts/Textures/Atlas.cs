@@ -239,6 +239,44 @@ public class Atlas
                 throw new NotImplementedException();
         }
     }
+
+    public List<MTexture> GetAtlasSubtextures(string key)
+    {
+        List<MTexture> mtextureList;
+        if (!this.orderedTexturesCache.TryGetValue(key, out mtextureList))
+        {
+            mtextureList = new List<MTexture>();
+            int index = 0;
+            while (true)
+            {
+                MTexture subtextureFromAtlasAt = this.GetAtlasSubtextureFromAtlasAt(key, index);
+                if (subtextureFromAtlasAt != null)
+                {
+                    mtextureList.Add(subtextureFromAtlasAt);
+                    ++index;
+                }
+                else
+                    break;
+            }
+            this.orderedTexturesCache.Add(key, mtextureList);
+        }
+        return mtextureList;
+    }
+
+    private MTexture GetAtlasSubtextureFromAtlasAt(string key, int index)
+    {
+        if (index == 0 && this.textures.ContainsKey(key))
+            return this.textures[key];
+        string str = index.ToString();
+        for (int length = str.Length; str.Length < length + 6; str = "0" + str)
+        {
+            MTexture mtexture;
+            if (this.textures.TryGetValue(key + str, out mtexture))
+                return mtexture;
+        }
+        return (MTexture)null;
+    }
+
     public static Texture2D ReadData(string path)
     {
         using (FileStream stream = File.OpenRead(System.IO.Path.Combine("F://steam//steamapps//common//Celeste//Content//Graphics//Atlases", path)))

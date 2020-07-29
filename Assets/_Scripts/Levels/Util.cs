@@ -30,35 +30,6 @@ namespace myd.celeste
             return Math.Min(Math.Max(value, min), max);
         }
 
-        public static T Choose<T>(this Rand random, T a, T b)
-        {
-            return GiveMe<T>(random.Next(2), a, b);
-        }
-        public static T Choose<T>(this Rand random, T a, T b, T c)
-        {
-            return GiveMe<T>(random.Next(3), a, b, c);
-        }
-        public static T Choose<T>(this Rand random, T a, T b, T c, T d)
-        {
-            return GiveMe<T>(random.Next(4), a, b, c, d);
-        }
-        public static T Choose<T>(this Rand random, T a, T b, T c, T d, T e)
-        {
-            return GiveMe<T>(random.Next(5), a, b, c, d, e);
-        }
-        public static T Choose<T>(this Rand random, T a, T b, T c, T d, T e, T f)
-        {
-            return GiveMe<T>(random.Next(6), a, b, c, d, e, f);
-        }
-        public static T Choose<T>(this Rand random, params T[] choices)
-        {
-            return choices[random.Next(choices.Length)];
-        }
-        public static T Choose<T>(this Rand random, List<T> choices)
-        {
-            return choices[random.Next(choices.Count)];
-        }
-
         public static string Attr(this XmlElement xml, string attributeName)
         {
             return xml.Attributes[attributeName]?.InnerText;
@@ -118,64 +89,7 @@ namespace myd.celeste
         {
             return (byte)"0123456789ABCDEF".IndexOf(char.ToUpper(c));
         }
-        public static T GiveMe<T>(int index, T a, T b)
-        {
-            if (index == 0)
-            {
-                return a;
-            }
-            if (index != 1)
-            {
-                throw new Exception("Index was out of range!");
-            }
-            return b;
-        }
-        public static T GiveMe<T>(int index, T a, T b, T c)
-        {
-            switch (index)
-            {
-                case 0: return a;
-                case 1: return b;
-                case 2: return c;
-                default: throw new Exception("Index was out of range!");
-            }
-        }
-        public static T GiveMe<T>(int index, T a, T b, T c, T d)
-        {
-            switch (index)
-            {
-                case 0: return a;
-                case 1: return b;
-                case 2: return c;
-                case 3: return d;
-                default: throw new Exception("Index was out of range!");
-            }
-        }
-        public static T GiveMe<T>(int index, T a, T b, T c, T d, T e)
-        {
-            switch (index)
-            {
-                case 0: return a;
-                case 1: return b;
-                case 2: return c;
-                case 3: return d;
-                case 4: return e;
-                default: throw new Exception("Index was out of range!");
-            }
-        }
-        public static T GiveMe<T>(int index, T a, T b, T c, T d, T e, T f)
-        {
-            switch (index)
-            {
-                case 0: return a;
-                case 1: return b;
-                case 2: return c;
-                case 3: return d;
-                case 4: return e;
-                case 5: return f;
-                default: throw new Exception("Index was out of range!");
-            }
-        }
+        
 
         public static Vector2 ClosestTo(this List<Vector2> list, Vector2 to)
         {

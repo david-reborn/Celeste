@@ -7,6 +7,7 @@ namespace myd.celeste
     {
         public static Atlas Game;
         public static Autotiler FGAutotiler;
-        
+        public static Autotiler BGAutotiler;
+        public static AnimatedTilesBank AnimatedTilesBank;
     }
 }

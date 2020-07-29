@@ -4,18 +4,21 @@ using System.Collections.Generic;
 using System.Xml;
 using myd.celeste;
 using System;
+using System.IO;
 
 public class Autotiler 
 {
 
-    public List<Rect> LevelBounds = new List<Rect>();
+    public List<Rectangle> LevelBounds = new List<Rectangle>();
     private Dictionary<char, Autotiler.TerrainType> lookup = new Dictionary<char, Autotiler.TerrainType>();
     private byte[] adjacent = new byte[9];
 
     public Autotiler(string filename)
     {
         Dictionary<char, XmlElement> dictionary = new Dictionary<char, XmlElement>();
-        foreach (XmlElement xml in Util.LoadContentXML(filename).GetElementsByTagName("Tileset"))
+        XmlDocument doc = new XmlDocument();
+        doc.Load(Path.Combine(Util.GAME_PATH_CONTENT, filename));
+        foreach (XmlElement xml in doc.GetElementsByTagName("Tileset"))
         {
             char ch = xml.AttrChar("id");
             Tileset tileset = new Tileset(Gfx.Game["tilesets/" + xml.Attr("path")], 8, 8);
@@ -41,6 +44,186 @@ public class Autotiler
             dictionary.Add(ch, xml);
             this.lookup.Add(ch, data);
         }
+    }
+    public Autotiler.Generated GenerateMap(VirtualMap<char> mapData, bool paddingIgnoreOutOfLevel)
+    {
+        Autotiler.Behaviour behaviour = new Autotiler.Behaviour()
+        {
+            EdgesExtend = true,
+            EdgesIgnoreOutOfLevel = false,
+            PaddingIgnoreOutOfLevel = paddingIgnoreOutOfLevel
+        };
+        return this.Generate(mapData, 0, 0, mapData.Columns, mapData.Rows, false, '0', behaviour);
+    }
+
+    private Autotiler.Generated Generate(
+      VirtualMap<char> mapData,
+      int startX,
+      int startY,
+      int tilesX,
+      int tilesY,
+      bool forceSolid,
+      char forceID,
+      Autotiler.Behaviour behaviour)
+    {
+        TileGrid tileGrid = new TileGrid(8, 8, tilesX, tilesY);
+        AnimatedTiles animatedTiles = new AnimatedTiles(tilesX, tilesY, Gfx.AnimatedTilesBank);
+        Rectangle forceFill = Rectangle.Empty;
+        if (forceSolid)
+            forceFill = new Rectangle(startX, startY, tilesX, tilesY);
+        if (mapData != null)
+        {
+            for (int x1 = startX; x1 < startX + tilesX; x1 += 50)
+            {
+                for (int y1 = startY; y1 < startY + tilesY; y1 += 50)
+                {
+                    if (!mapData.AnyInSegmentAtTile(x1, y1))
+                    {
+                        y1 = y1 / 50 * 50;
+                    }
+                    else
+                    {
+                        int x2 = x1;
+                        for (int index1 = Math.Min(x1 + 50, startX + tilesX); x2 < index1; ++x2)
+                        {
+                            int y2 = y1;
+                            for (int index2 = Math.Min(y1 + 50, startY + tilesY); y2 < index2; ++y2)
+                            {
+                                Autotiler.Tiles tiles = this.TileHandler(mapData, x2, y2, forceFill, forceID, behaviour);
+                                if (tiles != null)
+                                {
+                                    tileGrid.Tiles[x2 - startX, y2 - startY] = RandomUtil.Random.Choose<MTexture>(tiles.Textures);
+                                    if (tiles.HasOverlays)
+                                        animatedTiles.Set(x2 - startX, y2 - startY, RandomUtil.Random.Choose<string>(tiles.OverlapSprites), 1f, 1f);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        else
+        {
+            for (int x = startX; x < startX + tilesX; ++x)
+            {
+                for (int y = startY; y < startY + tilesY; ++y)
+                {
+                    Autotiler.Tiles tiles = this.TileHandler((VirtualMap<char>)null, x, y, forceFill, forceID, behaviour);
+                    if (tiles != null)
+                    {
+                        tileGrid.Tiles[x - startX, y - startY] = RandomUtil.Random.Choose<MTexture>(tiles.Textures);
+                        if (tiles.HasOverlays)
+                            animatedTiles.Set(x - startX, y - startY, RandomUtil.Random.Choose<string>(tiles.OverlapSprites), 1f, 1f);
+                    }
+                }
+            }
+        }
+        return new Autotiler.Generated()
+        {
+            TileGrid = tileGrid,
+            SpriteOverlay = animatedTiles
+        };
+    }
+
+    private Autotiler.Tiles TileHandler(
+     VirtualMap<char> mapData,
+     int x,
+     int y,
+     Rectangle forceFill,
+     char forceID,
+     Autotiler.Behaviour behaviour)
+    {
+        char tile = this.GetTile(mapData, x, y, forceFill, forceID, behaviour);
+        if (this.IsEmpty(tile))
+            return (Autotiler.Tiles)null;
+        Autotiler.TerrainType set = this.lookup[tile];
+        bool flag1 = true;
+        int num = 0;
+        for (int index1 = -1; index1 < 2; ++index1)
+        {
+            for (int index2 = -1; index2 < 2; ++index2)
+            {
+                bool flag2 = this.CheckTile(set, mapData, x + index2, y + index1, forceFill, behaviour);
+                if (!flag2 && behaviour.EdgesIgnoreOutOfLevel && !this.CheckForSameLevel(x, y, x + index2, y + index1))
+                    flag2 = true;
+                this.adjacent[num++] = flag2 ? (byte)1 : (byte)0;
+                if (!flag2)
+                    flag1 = false;
+            }
+        }
+        if (flag1)
+            return (behaviour.PaddingIgnoreOutOfLevel ? !this.CheckTile(set, mapData, x - 2, y, forceFill, behaviour) && this.CheckForSameLevel(x, y, x - 2, y) || !this.CheckTile(set, mapData, x + 2, y, forceFill, behaviour) && this.CheckForSameLevel(x, y, x + 2, y) || !this.CheckTile(set, mapData, x, y - 2, forceFill, behaviour) && this.CheckForSameLevel(x, y, x, y - 2) || !this.CheckTile(set, mapData, x, y + 2, forceFill, behaviour) && this.CheckForSameLevel(x, y, x, y + 2) : !this.CheckTile(set, mapData, x - 2, y, forceFill, behaviour) || !this.CheckTile(set, mapData, x + 2, y, forceFill, behaviour) || !this.CheckTile(set, mapData, x, y - 2, forceFill, behaviour) || !this.CheckTile(set, mapData, x, y + 2, forceFill, behaviour)) ? this.lookup[tile].Padded : this.lookup[tile].Center;
+        foreach (Autotiler.Masked masked in set.Masked)
+        {
+            bool flag2 = true;
+            for (int index = 0; index < 9 & flag2; ++index)
+            {
+                if (masked.Mask[index] != (byte)2 && (int)masked.Mask[index] != (int)this.adjacent[index])
+                    flag2 = false;
+            }
+            if (flag2)
+                return masked.Tiles;
+        }
+        return (Autotiler.Tiles)null;
+    }
+
+    private bool CheckForSameLevel(int x1, int y1, int x2, int y2)
+    {
+        foreach (Rectangle levelBound in this.LevelBounds)
+        {
+            if (levelBound.Contains(x1, y1) && levelBound.Contains(x2, y2))
+                return true;
+        }
+        return false;
+    }
+
+    private bool CheckTile(
+      Autotiler.TerrainType set,
+      VirtualMap<char> mapData,
+      int x,
+      int y,
+      Rectangle forceFill,
+      Autotiler.Behaviour behaviour)
+    {
+        if (forceFill.Contains(x, y))
+            return true;
+        if (mapData == null)
+            return behaviour.EdgesExtend;
+        if (x < 0 || y < 0 || x >= mapData.Columns || y >= mapData.Rows)
+        {
+            if (!behaviour.EdgesExtend)
+                return false;
+            char ch = mapData[Util.Clamp(x, 0, mapData.Columns - 1), Util.Clamp(y, 0, mapData.Rows - 1)];
+            return !this.IsEmpty(ch) && !set.Ignore(ch);
+        }
+        char ch1 = mapData[x, y];
+        return !this.IsEmpty(ch1) && !set.Ignore(ch1);
+    }
+
+    private char GetTile(
+      VirtualMap<char> mapData,
+      int x,
+      int y,
+      Rectangle forceFill,
+      char forceID,
+      Autotiler.Behaviour behaviour)
+    {
+        if (forceFill.Contains(x, y))
+            return forceID;
+        if (mapData == null)
+            return !behaviour.EdgesExtend ? '0' : forceID;
+        if (x >= 0 && y >= 0 && x < mapData.Columns && y < mapData.Rows)
+            return mapData[x, y];
+        if (!behaviour.EdgesExtend)
+            return '0';
+        int index1 = Util.Clamp(x, 0, mapData.Columns - 1);
+        int index2 = Util.Clamp(y, 0, mapData.Rows - 1);
+        return mapData[index1, index2];
+    }
+
+    private bool IsEmpty(char id)
+    {
+        return id == '0' || id == char.MinValue;
     }
 
     private void ReadInto(Autotiler.TerrainType data, Tileset tileset, XmlElement xml)
