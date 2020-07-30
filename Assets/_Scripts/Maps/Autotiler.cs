@@ -91,7 +91,8 @@ public class Autotiler
                             {
                                 Autotiler.Tiles tiles = this.TileHandler(mapData, x2, y2, forceFill, forceID, behaviour);
                                 if (tiles != null)
-                                {
+                                {//TODO
+                                    tiles = this.TileHandler(mapData, x2, y2, forceFill, forceID, behaviour);
                                     tileGrid.Tiles[x2 - startX, y2 - startY] = RandomUtil.Random.Choose<MTexture>(tiles.Textures);
                                     if (tiles.HasOverlays)
                                         animatedTiles.Set(x2 - startX, y2 - startY, RandomUtil.Random.Choose<string>(tiles.OverlapSprites), 1f, 1f);

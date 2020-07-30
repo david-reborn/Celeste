@@ -39,6 +39,15 @@ public class MTexture
         //this.USprite = UnityEngine.Sprite.Create(Texture, ClipRect, Vector3.zero);
     }
 
+    public Sprite GetSprite()
+    {
+        if (this.USprite == null)
+        {
+            this.USprite = UnityEngine.Sprite.Create(Texture, ClipRect, Vector3.zero);
+        }
+        return this.USprite;
+    }
+
     public MTexture(MTexture parent, int x, int y, int width, int height)
     {
         this.Texture = parent.Texture;
