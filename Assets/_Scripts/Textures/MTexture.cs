@@ -36,6 +36,7 @@ public class MTexture
         this.Width = Mathf.RoundToInt(this.ClipRect.width);
         this.Height = Mathf.RoundToInt(this.ClipRect.height);
         this.SetUtil();
+        //this.USprite = UnityEngine.Sprite.Create(Texture, ClipRect, Vector3.zero);
     }
 
     public MTexture(MTexture parent, int x, int y, int width, int height)
@@ -46,6 +47,7 @@ public class MTexture
         this.Width = width;
         this.Height = height;
         this.SetUtil();
+        //this.USprite = UnityEngine.Sprite.Create(Texture, ClipRect, Vector3.zero);
     }
 
     public MTexture(Texture2D texture, Rect clipRect, Vector2 drawOffset, int width, int height)
@@ -57,6 +59,7 @@ public class MTexture
         this.Height = height;
 
         this.SetUtil();
+        //this.USprite = UnityEngine.Sprite.Create(Texture, clipRect, Vector3.zero);
     }
 
     public MTexture(MTexture parent, string atlasPath, Rect clipRect, Vector2 drawOffset, int width, int height)
@@ -68,6 +71,8 @@ public class MTexture
         this.Width = width;
         this.Height = height;
         this.SetUtil();
+
+        //this.USprite = UnityEngine.Sprite.Create(Texture, clipRect, Vector3.zero);
     }
 
     //public MTexture(MTexture parent, string atlasPath, Rect clipRect, Vector2 drawOffset, int width, int height)

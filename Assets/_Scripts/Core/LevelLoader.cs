@@ -297,7 +297,7 @@ namespace myd.celeste
                 }
             }
             Vector2 position = new Vector2((float)tileBounds1.X, (float)tileBounds1.Y) * 8f;
-            //Util.PushRandom(mapData.LoadSeed);
+            RandomUtil.PushRandom(mapData.LoadSeed);
             Level level1 = this.Level;
             Level level2 = this.Level;
             BackgroundTiles backgroundTiles1;
@@ -305,9 +305,10 @@ namespace myd.celeste
             BackgroundTiles backgroundTiles3 = backgroundTiles1;
             level2.BgTiles = backgroundTiles1;
             BackgroundTiles backgroundTiles4 = backgroundTiles3;
+            level2.BgTiles = backgroundTiles4;
             //level1.Add((Entity)backgroundTiles4);
-            Level level3 = this.Level;
-            Level level4 = this.Level;
+            //Level level3 = this.Level;
+            //Level level4 = this.Level;
             //SolidTiles solidTiles1;
             //SolidTiles solidTiles2 = solidTiles1 = new SolidTiles(position, data2);
             //SolidTiles solidTiles3 = solidTiles1;
@@ -316,7 +317,7 @@ namespace myd.celeste
             //level3.Add((Entity)solidTiles4);
             //this.Level.BgData = data1;
             //this.Level.SolidsData = data2;
-            //Calc.PopRandom();
+            RandomUtil.PopRandom();
             //      new Entity(position)
             //{
             //  (Component) (this.Level.FgTilesLightMask = new TileGrid(8, 8, tileBounds1.Width, tileBounds1.Height))
@@ -345,7 +346,10 @@ namespace myd.celeste
             //this.Level.StartPosition = this.startPosition;
             //this.Level.Pathfinder = new Pathfinder(this.Level);
             //this.Loaded = true;
+
+            //解
         }
+
 
     }
 }

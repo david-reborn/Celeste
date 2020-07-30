@@ -279,7 +279,7 @@ public class Atlas
 
     public static Texture2D ReadData(string path)
     {
-        using (FileStream stream = File.OpenRead(System.IO.Path.Combine("F://steam//steamapps//common//Celeste//Content//Graphics//Atlases", path)))
+        using (FileStream stream = File.OpenRead(Path.Combine(Util.GAME_PATH_CONTENT,"Graphics","Atlases", path)))
         {
             byte[] buffer;
             byte[] buffer2 = new byte[0x4000000];

@@ -12,5 +12,9 @@ namespace myd.celeste
         public BackdropRenderer Background;
 
         public BackgroundTiles BgTiles;
+        public Vector2 StartPosition;
+
+
+
     }
 }

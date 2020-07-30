@@ -129,50 +129,34 @@ public class TileGrid
         }
     }
 
-    //public Rectangle GetClippedRenderTiles()
-    //{
-    //    Vector2 vector2 = this.Entity.Position + this.Position;
-    //    int val1_1;
-    //    int val1_2;
-    //    int val1_3;
-    //    int val1_4;
-    //    if (this.ClipCamera == null)
-    //    {
-    //        val1_1 = -this.VisualExtend;
-    //        val1_2 = -this.VisualExtend;
-    //        val1_3 = this.TilesX + this.VisualExtend;
-    //        val1_4 = this.TilesY + this.VisualExtend;
-    //    }
-    //    else
-    //    {
-    //        Camera clipCamera = this.ClipCamera;
-    //        val1_1 = (int)Math.Max(0.0, Math.Floor(((double)clipCamera.Left - (double)vector2.X) / (double)this.TileWidth) - (double)this.VisualExtend);
-    //        val1_2 = (int)Math.Max(0.0, Math.Floor(((double)clipCamera.Top - (double)vector2.Y) / (double)this.TileHeight) - (double)this.VisualExtend);
-    //        val1_3 = (int)Math.Min((double)this.TilesX, Math.Ceiling(((double)clipCamera.Right - (double)vector2.X) / (double)this.TileWidth) + (double)this.VisualExtend);
-    //        val1_4 = (int)Math.Min((double)this.TilesY, Math.Ceiling(((double)clipCamera.Bottom - (double)vector2.Y) / (double)this.TileHeight) + (double)this.VisualExtend);
-    //    }
-    //    int x = Math.Max(val1_1, 0);
-    //    int y = Math.Max(val1_2, 0);
-    //    int num1 = Math.Min(val1_3, this.TilesX);
-    //    int num2 = Math.Min(val1_4, this.TilesY);
-    //    return new Rectangle(x, y, num1 - x, num2 - y);
-    //}
+    public Rectangle GetClippedRenderTiles()
+    {
+        Vector2 vector2 = this.Position;
+        int val1_1;
+        int val1_2;
+        int val1_3;
+        int val1_4;
+        //if (this.ClipCamera == null)
+        //{
+            val1_1 = -this.VisualExtend;
+            val1_2 = -this.VisualExtend;
+            val1_3 = this.TilesX + this.VisualExtend;
+            val1_4 = this.TilesY + this.VisualExtend;
+        //}
+        //else
+        //{
+        //    Camera clipCamera = this.ClipCamera;
+        //    val1_1 = (int)Math.Max(0.0, Math.Floor(((double)clipCamera.Left - vector2.X) / (double)this.TileWidth) - (double)this.VisualExtend);
+        //    val1_2 = (int)Math.Max(0.0, Math.Floor(((double)clipCamera.Top - vector2.Y) / (double)this.TileHeight) - (double)this.VisualExtend);
+        //    val1_3 = (int)Math.Min((double)this.TilesX, Math.Ceiling(((double)clipCamera.Right - vector2.X) / (double)this.TileWidth) + (double)this.VisualExtend);
+        //    val1_4 = (int)Math.Min((double)this.TilesY, Math.Ceiling(((double)clipCamera.Bottom - vector2.Y) / (double)this.TileHeight) + (double)this.VisualExtend);
+        //}
+        int num1 = Math.Max(val1_1, 0);
+        int num2 = Math.Max(val1_2, 0);
+        int num3 = Math.Min(val1_3, this.TilesX);
+        int num4 = Math.Min(val1_4, this.TilesY);
+        return new Rectangle(num1, num2, num3 - num1, num4 - num2);
+    }
 
-    //public override void Render()
-    //{
-    //    this.RenderAt(this.Entity.Position + this.Position);
-    //}
 
-    //public void RenderAt(Vector2 position)
-    //{
-    //    if ((double)this.Alpha <= 0.0)
-    //        return;
-    //    Rectangle clippedRenderTiles = this.GetClippedRenderTiles();
-    //    Color color = this.Color * this.Alpha;
-    //    for (int left = clippedRenderTiles.Left; left < clippedRenderTiles.Right; ++left)
-    //    {
-    //        for (int top = clippedRenderTiles.Top; top < clippedRenderTiles.Bottom; ++top)
-    //            this.Tiles[left, top]?.Draw(position + new Vector2((float)(left * this.TileWidth), (float)(top * this.TileHeight)), Vector2.Zero, color);
-    //    }
-    //}
 }

@@ -16,9 +16,4 @@ public class BackgroundTiles : Entity
         //this.Depth = 10000;
     }
 
-    //public override void Added(Scene scene)
-    //{
-    //    base.Added(scene);
-    //    this.Tiles.ClipCamera = this.SceneAs<Level>().Camera;
-    //}
 }

@@ -9,6 +9,9 @@ namespace myd.celeste.ext
     public class GameLoader : MonoBehaviour
     {
         public string level ;
+
+        public GameObject spritePrefab;
+
         public void Start()
         {
             //读取GamePlay的MTexture文件
@@ -43,6 +46,32 @@ namespace myd.celeste.ext
 
             Debug.Log("==加载关卡LevelLoad");
             LevelLoader loader = new LevelLoader(session, null);
+
+            DrawTiles(loader.Level.BgTiles);
+        }
+
+        private void DrawTiles(BackgroundTiles backgroundTiles)
+        {
+            VirtualMap<MTexture> virtualMap = backgroundTiles.Tiles.Tiles;
+
+            Rectangle clippedRenderTiles = backgroundTiles.Tiles.GetClippedRenderTiles();
+            for (int left = clippedRenderTiles.Left; left < clippedRenderTiles.Right; ++left)
+            {
+                for (int top = clippedRenderTiles.Top; top < clippedRenderTiles.Bottom; ++top)
+                {
+                    GameObject gb = Instantiate(spritePrefab);
+                    gb.transform.SetParent(this.transform, false);
+                    MTexture mTexture = backgroundTiles.Tiles.Tiles[left, top];
+                    if (mTexture == null)
+                    {
+                        continue;
+                    }
+                    gb.GetComponent<SpriteRenderer>().sprite = mTexture.USprite;
+                    gb.transform.position = new Vector3((float)(left * backgroundTiles.Tiles.TileWidth), (float)(top * backgroundTiles.Tiles.TileHeight), 0);
+                    //backgroundTiles.Tiles.Tiles[left, top].USprite;
+                    //backgroundTiles.Tiles.Tiles[left, top]?.Draw(new Vector2((float)(left * backgroundTiles.Tiles.TileWidth), (float)(top * backgroundTiles.Tiles.TileHeight))), Vector2.zero, color);
+                }
+            }
         }
 
     }
