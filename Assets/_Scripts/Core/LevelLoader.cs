@@ -11,8 +11,7 @@ namespace myd.celeste
         private Session session;
         private Vector2? startPosition;
         public Level Level { get; private set; }
-
-
+        public SolidTiles solidTiles;
         public LevelLoader(Session session, Vector2? startPosition = null)
         {
             this.session = session;
@@ -34,6 +33,7 @@ namespace myd.celeste
         //加载关卡数据
         private void LoadingThread()
         {
+            //MapData表示整个地图的数据
             MapData mapData = this.session.MapData;
             
             AreaData areaData = AreaData.Get(this.session.Area.ID);
@@ -50,9 +50,16 @@ namespace myd.celeste
             this.Level.BackgroundColor = mapData.BackgroundColor;
             this.Level.Background.Backdrops = mapData.CreateBackdrops(mapData.Background);
             foreach (Backdrop backdrop in this.Level.Background.Backdrops)
+            {
                 backdrop.Renderer = this.Level.Background;
-
+            }
             //加载前景地图
+            //this.Level.Foreground.Backdrops = mapData.CreateBackdrops(mapData.Foreground);
+            //foreach (Backdrop backdrop in this.Level.Foreground.Backdrops)
+            //{
+            //    backdrop.Renderer = this.Level.Foreground;
+            //}
+            
             Rectangle tileBounds1 = mapData.TileBounds;
             Gfx.FGAutotiler.LevelBounds.Clear();
             VirtualMap<char> data1 = new VirtualMap<char>(tileBounds1.Width, tileBounds1.Height, '0');
@@ -309,11 +316,7 @@ namespace myd.celeste
             //level1.Add((Entity)backgroundTiles4);
             //Level level3 = this.Level;
             //Level level4 = this.Level;
-            //SolidTiles solidTiles1;
-            //SolidTiles solidTiles2 = solidTiles1 = new SolidTiles(position, data2);
-            //SolidTiles solidTiles3 = solidTiles1;
-            //level4.SolidTiles = solidTiles1;
-            //SolidTiles solidTiles4 = solidTiles3;
+            solidTiles = new SolidTiles(position, data2);
             //level3.Add((Entity)solidTiles4);
             //this.Level.BgData = data1;
             //this.Level.SolidsData = data2;

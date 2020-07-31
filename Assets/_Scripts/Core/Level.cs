@@ -10,10 +10,12 @@ namespace myd.celeste
     {
         public Color BackgroundColor = Color.black;
         public BackdropRenderer Background;
+        public BackdropRenderer Foreground;
 
         public BackgroundTiles BgTiles;
         public Vector2 StartPosition;
 
+        public SolidTiles tilles;
 
 
     }

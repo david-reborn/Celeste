@@ -43,7 +43,8 @@ public class MTexture
     {
         if (this.USprite == null)
         {
-            this.USprite = UnityEngine.Sprite.Create(Texture, ClipRect, Vector3.zero);
+            Rect rect = new Rect(this.ClipRect.x, this.Texture.width - this.ClipRect.y + 1, this.ClipRect.width, this.ClipRect.height);
+            this.USprite = UnityEngine.Sprite.Create(Texture, rect, new Vector2(0.5f, 0.5f));
         }
         return this.USprite;
     }
@@ -105,11 +106,11 @@ public class MTexture
 
     public Rect GetRelativeRect(float x, float y, float width, float height)
     {
-        float num = (this.ClipRect.x - (this.DrawOffset.x)) + x;
+        float num1 = (this.ClipRect.x - (this.DrawOffset.x)) + x;
         float num2 = (this.ClipRect.y - (this.DrawOffset.y)) + y;
-        float num3 = (int)Mathf.Clamp((float)num, (float)this.ClipRect.xMin, (float)this.ClipRect.xMax);
-        float num4 = (int)Mathf.Clamp((float)num2, (float)this.ClipRect.xMin, (float)this.ClipRect.xMax);
-        return new Rect(num3, num4, Mathf.Max(0, Mathf.Min(num + width, this.ClipRect.xMax) - num3), Mathf.Max(0, Mathf.Min(num2 + height, this.ClipRect.xMax) - num4));
+        float num3 = (int)Mathf.Clamp((float)num1, (float)this.ClipRect.xMin, (float)this.ClipRect.xMax);
+        float num4 = (int)Mathf.Clamp((float)num2, (float)this.ClipRect.yMin, (float)this.ClipRect.yMax);
+        return new Rect(num3, num4, Mathf.Max(0, Mathf.Min(num1 + width, this.ClipRect.xMax) - num3), Mathf.Max(0, Mathf.Min(num2 + height, this.ClipRect.yMax) - num4));
     }
 
     private void SetUtil()

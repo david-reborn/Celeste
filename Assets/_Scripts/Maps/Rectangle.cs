@@ -3,8 +3,8 @@ using System.Collections;
 
 public class Rectangle 
 {
-
     public static Rectangle Empty = new Rectangle(0,0,0,0);
+
     Rect rect;
 
     public Rectangle(float x, float y, int w, int h)

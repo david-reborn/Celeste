@@ -295,7 +295,7 @@ public class Atlas
             int elementCount = (width * height) * 4;
             int index = 0;
 
-            Texture2D texture = new Texture2D(width, height, TextureFormat.RGBA32, true);
+            Texture2D texture = new Texture2D(width, height, TextureFormat.RGBA32, false);
             try
             {
                 byte[] numPtr;
@@ -413,7 +413,8 @@ public class Atlas
                 }
             }
             texture.SetPixels32(0, 0, width, height, tempColors);
-            byte[] _bytes = texture.EncodeToPNG();
+            texture.Apply();
+            //byte[] _bytes = texture.EncodeToPNG();
             //System.IO.File.WriteAllBytes("F://" + path, _bytes);
             return texture;
         }

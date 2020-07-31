@@ -6,9 +6,11 @@ using myd.celeste;
 using System;
 using System.IO;
 
+/// <summary>
+/// 地图的集合，如前景地图
+/// </summary>
 public class Autotiler 
 {
-
     public List<Rectangle> LevelBounds = new List<Rectangle>();
     private Dictionary<char, Autotiler.TerrainType> lookup = new Dictionary<char, Autotiler.TerrainType>();
     private byte[] adjacent = new byte[9];

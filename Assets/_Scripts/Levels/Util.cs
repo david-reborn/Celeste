@@ -10,9 +10,13 @@ namespace myd.celeste
 {
     public static class Util
     {
-        public static string ROOT = "F:/Unity/Celeste/Resources/";
-        public static string GAME_PATH = "F:/Steam/steamapps/common/Celeste/";
-        public static string GAME_PATH_CONTENT = "F:/Steam/steamapps/common/Celeste/Content/";
+        //public static string ROOT = "F:/Unity/Celeste/Resources/";
+        //public static string GAME_PATH = "F:/Steam/steamapps/common/Celeste/";
+        //public static string GAME_PATH_CONTENT = "F:/Steam/steamapps/common/Celeste/Content/";
+
+        public static string ROOT = "F:/Celeste/Resources/";
+        public static string GAME_PATH = "D:/Program Files (x86)/Steam/steamapps/common/Celeste/";
+        public static string GAME_PATH_CONTENT = "D:/Program Files (x86)/Steam/steamapps/common/Celeste/Content/";
 
         public static Rand Random = new Rand();
 

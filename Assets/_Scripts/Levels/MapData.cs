@@ -9,6 +9,9 @@ using UnityEngine.Rendering;
 
 namespace myd.celeste
 {
+    /// <summary>
+    /// 章节地图配置信息，包括N个关卡
+    /// </summary>
     public class MapData
     {
         public List<LevelData> Levels = new List<LevelData>();
@@ -24,7 +27,7 @@ namespace myd.celeste
         public bool DetectedHeartGem;
         public BinaryPacker.Element Foreground;
         public BinaryPacker.Element Background;
-        public Rect Bounds;
+        public Rectangle Bounds;
 
         public string Filename
         {
@@ -46,7 +49,7 @@ namespace myd.celeste
         {
             get
             {
-                return new Rectangle(this.Bounds.x / 8, this.Bounds.y / 8, (int)Math.Ceiling((double)this.Bounds.width / 8.0), (int)Math.Ceiling((double)this.Bounds.height / 8.0));
+                return new Rectangle(this.Bounds.X / 8, this.Bounds.Y / 8, (int)Math.Ceiling((double)this.Bounds.Width / 8.0), (int)Math.Ceiling((double)this.Bounds.Height / 8.0));
             }
         }
 
@@ -185,7 +188,7 @@ namespace myd.celeste
                     num4 = rectangle.Bottom;
             }
             int num5 = 64;
-            this.Bounds = new Rect(num1 - num5, num2 - num5, num3 - num1 + num5 * 2, num4 - num2 + num5 * 2);
+            this.Bounds = new Rectangle(num1 - num5, num2 - num5, num3 - num1 + num5 * 2, num4 - num2 + num5 * 2);
             this.ModeData.TotalStrawberries = 0;
             this.ModeData.StartStrawberries = 0;
             this.ModeData.StrawberriesByCheckpoint = new EntityData[10, 25];

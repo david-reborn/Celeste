@@ -3,7 +3,6 @@ using System.Collections;
 
 public class Tileset 
 {
-
     private MTexture[,] tiles;
 
     public Tileset(MTexture texture, int tileWidth, int tileHeight)
