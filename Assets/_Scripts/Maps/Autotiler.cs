@@ -12,7 +12,7 @@ using System.IO;
 public class Autotiler 
 {
     public List<Rectangle> LevelBounds = new List<Rectangle>();
-    private Dictionary<char, Autotiler.TerrainType> lookup = new Dictionary<char, Autotiler.TerrainType>();
+    public Dictionary<char, Autotiler.TerrainType> lookup = new Dictionary<char, Autotiler.TerrainType>();
     private byte[] adjacent = new byte[9];
 
     public Autotiler(string filename)
@@ -93,8 +93,7 @@ public class Autotiler
                             {
                                 Autotiler.Tiles tiles = this.TileHandler(mapData, x2, y2, forceFill, forceID, behaviour);
                                 if (tiles != null)
-                                {//TODO
-                                    tiles = this.TileHandler(mapData, x2, y2, forceFill, forceID, behaviour);
+                                {
                                     tileGrid.Tiles[x2 - startX, y2 - startY] = RandomUtil.Random.Choose<MTexture>(tiles.Textures);
                                     if (tiles.HasOverlays)
                                         animatedTiles.Set(x2 - startX, y2 - startY, RandomUtil.Random.Choose<string>(tiles.OverlapSprites), 1f, 1f);
@@ -140,6 +139,10 @@ public class Autotiler
         if (this.IsEmpty(tile))
             return (Autotiler.Tiles)null;
         Autotiler.TerrainType set = this.lookup[tile];
+        if (tile == '1')
+        {
+            Debug.Log(tile);
+        }
         bool flag1 = true;
         int num = 0;
         for (int index1 = -1; index1 < 2; ++index1)
@@ -155,9 +158,29 @@ public class Autotiler
             }
         }
         if (flag1)
-            return (behaviour.PaddingIgnoreOutOfLevel ? !this.CheckTile(set, mapData, x - 2, y, forceFill, behaviour) && this.CheckForSameLevel(x, y, x - 2, y) || !this.CheckTile(set, mapData, x + 2, y, forceFill, behaviour) && this.CheckForSameLevel(x, y, x + 2, y) || !this.CheckTile(set, mapData, x, y - 2, forceFill, behaviour) && this.CheckForSameLevel(x, y, x, y - 2) || !this.CheckTile(set, mapData, x, y + 2, forceFill, behaviour) && this.CheckForSameLevel(x, y, x, y + 2) : !this.CheckTile(set, mapData, x - 2, y, forceFill, behaviour) || !this.CheckTile(set, mapData, x + 2, y, forceFill, behaviour) || !this.CheckTile(set, mapData, x, y - 2, forceFill, behaviour) || !this.CheckTile(set, mapData, x, y + 2, forceFill, behaviour)) ? this.lookup[tile].Padded : this.lookup[tile].Center;
-        foreach (Autotiler.Masked masked in set.Masked)
         {
+            bool f1 = !this.CheckTile(set, mapData, x - 2, y, forceFill, behaviour);
+            bool f2 = this.CheckForSameLevel(x, y, x - 2, y);
+            bool f3 = !this.CheckTile(set, mapData, x + 2, y, forceFill, behaviour);
+            bool f4 = this.CheckForSameLevel(x, y, x + 2, y);
+            bool f5 = this.CheckTile(set, mapData, x, y - 2, forceFill, behaviour);
+            bool f6 = this.CheckForSameLevel(x, y, x, y - 2);
+            bool f7 = !this.CheckTile(set, mapData, x, y + 2, forceFill, behaviour);
+            bool f8 =this.CheckForSameLevel(x, y, x, y + 2);
+
+
+            if ((behaviour.PaddingIgnoreOutOfLevel ? ((!this.CheckTile(set, mapData, x - 2, y, forceFill, behaviour) && this.CheckForSameLevel(x, y, x - 2, y)) || (!this.CheckTile(set, mapData, x + 2, y, forceFill, behaviour) && this.CheckForSameLevel(x, y, x + 2, y)) || (!this.CheckTile(set, mapData, x, y - 2, forceFill, behaviour) && this.CheckForSameLevel(x, y, x, y - 2)) || (!this.CheckTile(set, mapData, x, y + 2, forceFill, behaviour) && this.CheckForSameLevel(x, y, x, y + 2))) : (!this.CheckTile(set, mapData, x - 2, y, forceFill, behaviour) || !this.CheckTile(set, mapData, x + 2, y, forceFill, behaviour)) || (!this.CheckTile(set, mapData, x, y - 2, forceFill, behaviour)) || (!this.CheckTile(set, mapData, x, y + 2, forceFill, behaviour)))){
+                return this.lookup[tile].Padded;
+            }
+            else
+            {
+                return this.lookup[tile].Center;
+            }
+        }
+            //return  ? this.lookup[tile].Padded : this.lookup[tile].Center;
+        for (int p = 0; p < set.Masked.Count; p++)
+        {
+            Autotiler.Masked masked = set.Masked[p];
             bool flag2 = true;
             for (int index = 0; index < 9 & flag2; ++index)
             {
@@ -172,12 +195,13 @@ public class Autotiler
 
     private bool CheckForSameLevel(int x1, int y1, int x2, int y2)
     {
-        foreach (Rectangle levelBound in this.LevelBounds)
-        {
-            if (levelBound.Contains(x1, y1) && levelBound.Contains(x2, y2))
-                return true;
-        }
-        return false;
+        return true;
+        //foreach (Rectangle levelBound in this.LevelBounds)
+        //{
+        //    if (levelBound.Contains(x1, y1) && levelBound.Contains(x2, y2))
+        //        return true;
+        //}
+        //return false;
     }
 
     private bool CheckTile(
@@ -297,7 +321,7 @@ public class Autotiler
         }));
     }
 
-    private class TerrainType
+    public class TerrainType
     {
         public HashSet<char> Ignores = new HashSet<char>();
         public List<Autotiler.Masked> Masked = new List<Autotiler.Masked>();
@@ -316,13 +340,13 @@ public class Autotiler
         }
     }
 
-    private class Masked
+    public class Masked
     {
         public byte[] Mask = new byte[9];
         public Autotiler.Tiles Tiles = new Autotiler.Tiles();
     }
 
-    private class Tiles
+    public class Tiles
     {
         public List<MTexture> Textures = new List<MTexture>();
         public List<string> OverlapSprites = new List<string>();

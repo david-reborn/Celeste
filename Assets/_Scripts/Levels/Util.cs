@@ -5,18 +5,19 @@ using System.IO;
 using System;
 using System.Xml;
 using System.Collections.Generic;
+using System.Text;
 
 namespace myd.celeste
 {
     public static class Util
     {
-        //public static string ROOT = "F:/Unity/Celeste/Resources/";
-        //public static string GAME_PATH = "F:/Steam/steamapps/common/Celeste/";
-        //public static string GAME_PATH_CONTENT = "F:/Steam/steamapps/common/Celeste/Content/";
+        public static string ROOT = "F:/Unity/Celeste/Resources/";
+        public static string GAME_PATH = "F:/Steam/steamapps/common/Celeste/";
+        public static string GAME_PATH_CONTENT = "F:/Steam/steamapps/common/Celeste/Content/";
 
-        public static string ROOT = "F:/Celeste/Resources/";
-        public static string GAME_PATH = "D:/Program Files (x86)/Steam/steamapps/common/Celeste/";
-        public static string GAME_PATH_CONTENT = "D:/Program Files (x86)/Steam/steamapps/common/Celeste/Content/";
+        //public static string ROOT = "F:/Celeste/Resources/";
+        //public static string GAME_PATH = "D:/Program Files (x86)/Steam/steamapps/common/Celeste/";
+        //public static string GAME_PATH_CONTENT = "D:/Program Files (x86)/Steam/steamapps/common/Celeste/Content/";
 
         public static Rand Random = new Rand();
 
@@ -126,6 +127,112 @@ namespace myd.celeste
             //}
         }
 
+        public static int[,] ReadCSVIntGrid(string csv, int width, int height)
+        {
+            int[,] numArray = new int[width, height];
+            for (int index1 = 0; index1 < width; ++index1)
+            {
+                for (int index2 = 0; index2 < height; ++index2)
+                    numArray[index1, index2] = -1;
+            }
+            string[] strArray1 = csv.Split('\n');
+            for (int index1 = 0; index1 < height && index1 < strArray1.Length; ++index1)
+            {
+                string[] strArray2 = strArray1[index1].Split(new char[1]
+                {
+          ','
+                }, StringSplitOptions.RemoveEmptyEntries);
+                for (int index2 = 0; index2 < width && index2 < strArray2.Length; ++index2)
+                    numArray[index2, index1] = Convert.ToInt32(strArray2[index2]);
+            }
+            return numArray;
+        }
+
+        public static int[] ReadCSVInt(string csv)
+        {
+            if (csv == "")
+                return new int[0];
+            string[] strArray = csv.Split(',');
+            int[] numArray = new int[strArray.Length];
+            for (int index = 0; index < strArray.Length; ++index)
+                numArray[index] = Convert.ToInt32(strArray[index].Trim());
+            return numArray;
+        }
+
+        public static int[] ReadCSVIntWithTricks(string csv)
+        {
+            if (csv == "")
+                return new int[0];
+            string[] strArray1 = csv.Split(',');
+            List<int> intList = new List<int>();
+            foreach (string str in strArray1)
+            {
+                if (str.IndexOf('-') != -1)
+                {
+                    string[] strArray2 = str.Split('-');
+                    int int32_1 = Convert.ToInt32(strArray2[0]);
+                    int int32_2 = Convert.ToInt32(strArray2[1]);
+                    for (int index = int32_1; index != int32_2; index += Math.Sign(int32_2 - int32_1))
+                        intList.Add(index);
+                    intList.Add(int32_2);
+                }
+                else if (str.IndexOf('*') != -1)
+                {
+                    string[] strArray2 = str.Split('*');
+                    int int32_1 = Convert.ToInt32(strArray2[0]);
+                    int int32_2 = Convert.ToInt32(strArray2[1]);
+                    for (int index = 0; index < int32_2; ++index)
+                        intList.Add(int32_1);
+                }
+                else
+                    intList.Add(Convert.ToInt32(str));
+            }
+            return intList.ToArray();
+        }
+
+        public static string[] ReadCSV(string csv)
+        {
+            if (csv == "")
+                return new string[0];
+            string[] strArray = csv.Split(',');
+            for (int index = 0; index < strArray.Length; ++index)
+                strArray[index] = strArray[index].Trim();
+            return strArray;
+        }
+
+        public static string IntGridToCSV(int[,] data)
+        {
+            StringBuilder stringBuilder = new StringBuilder();
+            List<int> intList = new List<int>();
+            int num1 = 0;
+            for (int index1 = 0; index1 < data.GetLength(1); ++index1)
+            {
+                int num2 = 0;
+                for (int index2 = 0; index2 < data.GetLength(0); ++index2)
+                {
+                    if (data[index2, index1] == -1)
+                    {
+                        ++num2;
+                    }
+                    else
+                    {
+                        for (int index3 = 0; index3 < num1; ++index3)
+                            stringBuilder.Append('\n');
+                        for (int index3 = 0; index3 < num2; ++index3)
+                            intList.Add(-1);
+                        num2 = num1 = 0;
+                        intList.Add(data[index2, index1]);
+                    }
+                }
+                if (intList.Count > 0)
+                {
+                    stringBuilder.Append(string.Join<int>(",", (IEnumerable<int>)intList));
+                    intList.Clear();
+                }
+                ++num1;
+            }
+            return stringBuilder.ToString();
+        }
 
     }
 }

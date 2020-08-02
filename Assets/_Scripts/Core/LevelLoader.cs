@@ -79,6 +79,7 @@ namespace myd.celeste
                     for (int index2 = left1; index2 < left1 + strArray1[index1 - top1].Length; ++index2)
                         data1[index2 - tileBounds1.X, index1 - tileBounds1.Y] = strArray1[index1 - top1][index2 - left1];
                 }
+
                 string[] strArray2 = regex.Split(level.Solids);
                 for (int index1 = top1; index1 < top1 + strArray2.Length; ++index1)
                 {
@@ -309,10 +310,10 @@ namespace myd.celeste
             Level level2 = this.Level;
             BackgroundTiles backgroundTiles1;
             BackgroundTiles backgroundTiles2 = backgroundTiles1 = new BackgroundTiles(position, data1);
-            BackgroundTiles backgroundTiles3 = backgroundTiles1;
+            //BackgroundTiles backgroundTiles3 = backgroundTiles1;
             level2.BgTiles = backgroundTiles1;
-            BackgroundTiles backgroundTiles4 = backgroundTiles3;
-            level2.BgTiles = backgroundTiles4;
+            //BackgroundTiles backgroundTiles4 = backgroundTiles3;
+            //level2.BgTiles = backgroundTiles4;
             //level1.Add((Entity)backgroundTiles4);
             //Level level3 = this.Level;
             //Level level4 = this.Level;
@@ -321,11 +322,8 @@ namespace myd.celeste
             //this.Level.BgData = data1;
             //this.Level.SolidsData = data2;
             RandomUtil.PopRandom();
-            //      new Entity(position)
-            //{
-            //  (Component) (this.Level.FgTilesLightMask = new TileGrid(8, 8, tileBounds1.Width, tileBounds1.Height))
-            //};
-            //this.Level.FgTilesLightMask.Color = Color.Black;
+            //this.Level.FgTilesLightMask = new TileGrid(8, 8, tileBounds1.Width, tileBounds1.Height);
+            //this.Level.FgTilesLightMask.Color = Color.black;
             //foreach (LevelData level5 in mapData.Levels)
             //{
             //    int left = level5.TileBounds.Left;
@@ -334,14 +332,14 @@ namespace myd.celeste
             //    int height = level5.TileBounds.Height;
             //    if (!string.IsNullOrEmpty(level5.BgTiles))
             //    {
-            //        int[,] tiles = Calc.ReadCSVIntGrid(level5.BgTiles, width, height);
-            //        backgroundTiles2.Tiles.Overlay(GFX.SceneryTiles, tiles, left - tileBounds1.X, top - tileBounds1.Y);
+            //        int[,] tiles = Util.ReadCSVIntGrid(level5.BgTiles, width, height);
+            //        backgroundTiles2.Tiles.Overlay(Gfx.SceneryTiles, tiles, left - tileBounds1.X, top - tileBounds1.Y);
             //    }
             //    if (!string.IsNullOrEmpty(level5.FgTiles))
             //    {
-            //        int[,] tiles = Calc.ReadCSVIntGrid(level5.FgTiles, width, height);
-            //        solidTiles2.Tiles.Overlay(GFX.SceneryTiles, tiles, left - tileBounds1.X, top - tileBounds1.Y);
-            //        this.Level.FgTilesLightMask.Overlay(GFX.SceneryTiles, tiles, left - tileBounds1.X, top - tileBounds1.Y);
+            //        int[,] tiles = Util.ReadCSVIntGrid(level5.FgTiles, width, height);
+            //        solidTiles.Tiles.Overlay(Gfx.SceneryTiles, tiles, left - tileBounds1.X, top - tileBounds1.Y);
+            //        this.Level.FgTilesLightMask.Overlay(Gfx.SceneryTiles, tiles, left - tileBounds1.X, top - tileBounds1.Y);
             //    }
             //}
             //if (areaData.OnLevelBegin != null)
@@ -350,9 +348,31 @@ namespace myd.celeste
             //this.Level.Pathfinder = new Pathfinder(this.Level);
             //this.Loaded = true;
 
-            //解
         }
 
+        private VirtualMap<char> ReadMapChar(string tiles, int width, int height)
+        {
+            VirtualMap<char> mapData = new VirtualMap<char>(width, height, '0');
+            int length = tiles.Length;
+            int i = 0;
+            int col = 0, row = 0;
+
+            while (i < length)
+            {
+                char val = tiles[i++];
+                if (val == '\r' || val == '\n')
+                {
+                    if (val == '\n')
+                    {
+                        row++;
+                        col = 0;
+                    }
+                    continue;
+                }
+                mapData[col++, row] = val;
+            }
+            return mapData;
+        }
 
     }
 }

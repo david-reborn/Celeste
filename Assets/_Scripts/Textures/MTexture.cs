@@ -43,7 +43,7 @@ public class MTexture
     {
         if (this.USprite == null)
         {
-            Rect rect = new Rect(this.ClipRect.x, this.Texture.width - this.ClipRect.y + 1, this.ClipRect.width, this.ClipRect.height);
+            Rect rect = new Rect(this.ClipRect.x, this.Texture.height - this.ClipRect.y - this.ClipRect.height - 1, this.ClipRect.width, this.ClipRect.height);
             this.USprite = UnityEngine.Sprite.Create(Texture, rect, new Vector2(0.5f, 0.5f));
         }
         return this.USprite;

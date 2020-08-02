@@ -172,15 +172,19 @@ public class Atlas
                         for (int index2 = 0; index2 < (int)num2; ++index2)
                         {
                             string atlasPath = binaryReader.ReadString().Replace('\\', '/');
-                            short num3 = binaryReader.ReadInt16();
-                            short num4 = binaryReader.ReadInt16();
-                            short num5 = binaryReader.ReadInt16();
-                            short num6 = binaryReader.ReadInt16();
-                            short num7 = binaryReader.ReadInt16();
-                            short num8 = binaryReader.ReadInt16();
-                            short num9 = binaryReader.ReadInt16();
-                            short num10 = binaryReader.ReadInt16();
-                            atlas.textures[atlasPath] = new MTexture(parent2, atlasPath, new Rect((int)num3, (int)num4, (int)num5, (int)num6), new Vector2((float)-num7, (float)-num8), (int)num9, (int)num10);
+                            if (atlasPath == "tilesets/dirt")
+                            {
+                                Debug.Log(11);
+                            }
+                            short x = binaryReader.ReadInt16();
+                            short y = binaryReader.ReadInt16();
+                            short w = binaryReader.ReadInt16();
+                            short h = binaryReader.ReadInt16();
+                            short ox = binaryReader.ReadInt16();
+                            short oy = binaryReader.ReadInt16();
+                            short rw = binaryReader.ReadInt16();
+                            short rh = binaryReader.ReadInt16();
+                            atlas.textures[atlasPath] = new MTexture(parent2, atlasPath, new Rect((int)x, (int)y, (int)w, (int)h), new Vector2((float)-ox, (float)-oy), (int)rw, (int)rh);
                         }
                     }
                     if (fileStream.Position >= fileStream.Length || !(binaryReader.ReadString() == "LINKS"))
@@ -296,6 +300,7 @@ public class Atlas
             int index = 0;
 
             Texture2D texture = new Texture2D(width, height, TextureFormat.RGBA32, false);
+            texture.filterMode = FilterMode.Point;
             try
             {
                 byte[] numPtr;

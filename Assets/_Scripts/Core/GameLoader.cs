@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Xml;
 using UnityEngine;
+using static Autotiler;
 
 namespace myd.celeste.ext
 {
@@ -18,9 +19,14 @@ namespace myd.celeste.ext
             instance = this;
         }
 
-        public void ShowSprite(MTexture mTexture)
+        public void ShowSprite(MTexture mTexture, string name = null)
         {
+
             GameObject gameObject = Instantiate(spritePrefab);
+            if (name != null)
+            {
+                gameObject.name = name;
+            }
             gameObject.transform.SetParent(this.transform, false);
             gameObject.GetComponent<SpriteRenderer>().sprite = mTexture.GetSprite();
         }
@@ -32,6 +38,8 @@ namespace myd.celeste.ext
             Gfx.Game = Atlas.FromAtlas(Path.Combine("Graphics", "Atlases", "Gameplay"), Atlas.AtlasDataFormat.Packer);
             Gfx.BGAutotiler = new Autotiler(Path.Combine("Graphics", "BackgroundTiles.xml"));
             Gfx.FGAutotiler = new Autotiler(Path.Combine("Graphics", "ForegroundTiles.xml"));
+
+            //Gfx.SceneryTiles = new Tileset(Gfx.Game["tilesets/scenery"], 8, 8);
             //Gfx.AnimatedTilesBank = new AnimatedTilesBank();
             //foreach (XmlElement xml in (XmlNode)XmlUtils.LoadContentXML(Path.Combine("Graphics", "AnimatedTiles.xml"))["Data"])
             //{
@@ -59,14 +67,13 @@ namespace myd.celeste.ext
 
             Debug.Log("==加载关卡LevelLoad");
             LevelLoader loader = new LevelLoader(session, null);
+
+            StartCoroutine(DrawTiles(loader.Level.BgTiles.Tiles));
             StartCoroutine(DrawTiles(loader.solidTiles.Tiles));
-            //StartCoroutine(DrawTiles(loader.Level.BgTiles.Tiles));
         }
 
         private IEnumerator DrawTiles(TileGrid tileGrid)
         {
-            VirtualMap<MTexture> virtualMap = tileGrid.Tiles;
-
             Rectangle clippedRenderTiles = tileGrid.GetClippedRenderTiles();
             int count = 0;
             for (int left = clippedRenderTiles.Left; left < clippedRenderTiles.Right; ++left)
@@ -83,10 +90,10 @@ namespace myd.celeste.ext
                     GameObject gb = Instantiate(spritePrefab);
                     gb.transform.SetParent(this.transform, false);
                     gb.GetComponent<SpriteRenderer>().sprite = mTexture.GetSprite();
-                    gb.transform.position = new Vector3((float)(left * tileGrid.TileWidth)/100f, (float)(top * tileGrid.TileHeight) / 100f, 0);
+                    gb.transform.position = new Vector3((float)(left * tileGrid.TileWidth)/100f, -(float)(top * tileGrid.TileHeight) / 100f, 0);
                     //backgroundTiles.Tiles.Tiles[left, top].USprite;
                     //backgroundTiles.Tiles.Tiles[left, top]?.Draw(new Vector2((float)(left * backgroundTiles.Tiles.TileWidth), (float)(top * backgroundTiles.Tiles.TileHeight))), Vector2.zero, color);
-                    Debug.Log(count);
+                    //Debug.Log(left+","+top);
                     yield return null;
                 }
             }

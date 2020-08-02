@@ -9,5 +9,7 @@ namespace myd.celeste
         public static Autotiler FGAutotiler;
         public static Autotiler BGAutotiler;
         public static AnimatedTilesBank AnimatedTilesBank;
+
+        public static Tileset SceneryTiles;
     }
 }

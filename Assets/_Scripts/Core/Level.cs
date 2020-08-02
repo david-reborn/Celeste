@@ -17,6 +17,8 @@ namespace myd.celeste
 
         public SolidTiles tilles;
 
+        public TileGrid FgTilesLightMask;
+
 
     }
 }

@@ -6,7 +6,7 @@ using System.IO;
 using System.Text.RegularExpressions;
 using System.Globalization;
 using UnityEngine.Rendering;
-
+using Newtonsoft.Json;
 namespace myd.celeste
 {
     /// <summary>
@@ -108,6 +108,8 @@ namespace myd.celeste
                 return;
             this.Strawberries = new List<EntityData>();
             BinaryPacker.Element element = BinaryPacker.FromBinary(this.Filepath);
+            //string file = JsonConvert.SerializeObject(element);
+            //File.WriteAllText("F:/test.json", file);
             if (!element.Package.Equals(this.ModeData.Path))
                 throw new Exception("Corrupted Level Data");
             foreach (BinaryPacker.Element child1 in element.Children)
