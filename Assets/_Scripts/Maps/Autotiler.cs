@@ -139,10 +139,6 @@ public class Autotiler
         if (this.IsEmpty(tile))
             return (Autotiler.Tiles)null;
         Autotiler.TerrainType set = this.lookup[tile];
-        if (tile == '1')
-        {
-            Debug.Log(tile);
-        }
         bool flag1 = true;
         int num = 0;
         for (int index1 = -1; index1 < 2; ++index1)

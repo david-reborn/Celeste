@@ -44,6 +44,11 @@ namespace myd.celeste
             //return this.ForceVisible || (string.IsNullOrEmpty(this.OnlyIfNotFlag) || !level.Session.GetFlag(this.OnlyIfNotFlag)) && (!string.IsNullOrEmpty(this.AlsoIfFlag) && level.Session.GetFlag(this.AlsoIfFlag) || (!this.Dreaming.HasValue || this.Dreaming.Value == level.Session.Dreaming) && (string.IsNullOrEmpty(this.OnlyIfFlag) || level.Session.GetFlag(this.OnlyIfFlag)) && ((this.ExcludeFrom == null || !this.ExcludeFrom.Contains(level.Session.Level)) && (this.OnlyIn == null || this.OnlyIn.Contains(level.Session.Level))));
         }
 
+        public  virtual void OnRefresh()
+        {
+
+        }
+
         public virtual void Update(Scene scene)
         {
             //Level level = scene as Level;

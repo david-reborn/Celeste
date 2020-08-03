@@ -234,5 +234,10 @@ namespace myd.celeste
             return stringBuilder.ToString();
         }
 
+        public static Vector2 Floor(this Vector2 val)
+        {
+            return new Vector2((float)(int)Math.Floor((double)val.x), (float)(int)Math.Floor((double)val.y));
+        }
+
     }
 }

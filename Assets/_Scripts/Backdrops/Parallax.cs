@@ -2,16 +2,50 @@
 using System.Collections;
 using myd.celeste;
 using UnityEngine.Rendering;
+using System.Collections.Generic;
 
 public class Parallax : Backdrop
 {
-    // Token: 0x06001B7D RID: 7037 RVA: 0x000C947C File Offset: 0x000C767C
+    private List<Sprite> sprites = new List<Sprite>();
     public Parallax(MTexture texture)
     {
         this.Name = texture.AtlasPath;
         this.Texture = texture;
     }
 
+    public override void OnRefresh()
+    {
+        Vector2 vector2_1 = new Vector2(Camera.main.transform.position.x+10, Camera.main.transform.position.y).Floor();
+        Vector2 vector2_2 = (this.Position - vector2_1 * this.Scroll).Floor();
+
+        if (this.LoopX)
+        {
+            while ((double)vector2_2.x < 0.0)
+                vector2_2.x += (float)this.Texture.Width;
+            while ((double)vector2_2.x > 0.0)
+                vector2_2.x -= (float)this.Texture.Width;
+        }
+        if (this.LoopY)
+        {
+            while ((double)vector2_2.y < 0.0)
+                vector2_2.y += (float)this.Texture.Height;
+            while ((double)vector2_2.y > 0.0)
+                vector2_2.y -= (float)this.Texture.Height;
+        }
+        for (float x = vector2_2.x; (double)x < 320.0; x += (float)this.Texture.Width)
+        {
+            for (float y = vector2_2.y; (double)y < 180.0; y += (float)this.Texture.Height)
+            {
+                GameObject gb = MyGameLoader.instance.ShowSprite(this.Texture, Name);
+                gb.transform.position = new Vector3(x / 100f, -y/100f, 0);
+                //this.Texture.Draw(new Vector2(x, y), Vector2.Zero, color, 1f, 0.0f, flip);
+                if (!this.LoopY)
+                    break;
+            }
+            if (!this.LoopX)
+                break;
+        }
+    }
     //// Token: 0x06001B7E RID: 7038 RVA: 0x000C94D0 File Offset: 0x000C76D0
     //public override void Update(Scene scene)
     //{
