@@ -300,8 +300,8 @@ namespace myd.celeste
                     parallax.BlendState = BlendState.defaultValue;
                 parallax.DoFadeIn = bool.Parse(child.Attr("fadeIn", "false"));
             }
-            //else if (child.Name.Equals("snowfg", StringComparison.OrdinalIgnoreCase))
-            //    backdrop = (Backdrop)new Snow(true);
+            else if (child.Name.Equals("snowfg", StringComparison.OrdinalIgnoreCase))
+                backdrop = (Backdrop)new Snow(true);
             else if (child.Name.Equals("snowbg", StringComparison.OrdinalIgnoreCase))
                 backdrop = (Backdrop)new Snow(false);
             //else if (child.Name.Equals("windsnow", StringComparison.OrdinalIgnoreCase))
@@ -523,6 +523,7 @@ namespace myd.celeste
                     }
                 }
             }
+            backdrop.OnRefresh();
             return backdrop;
         }
 
