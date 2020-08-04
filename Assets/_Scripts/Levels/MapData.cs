@@ -289,7 +289,14 @@ namespace myd.celeste
                 string id = child.Attr("texture", "");
                 string str1 = child.Attr("atlas", "game");
                 //Parallax parallax = new Parallax(!(str1 == "game") || !GFX.Game.Has(id) ? (!(str1 == "gui") || !GFX.Gui.Has(id) ? GFX.Misc[id] : GFX.Gui[id]) : GFX.Game[id]);
-                Parallax parallax = new Parallax(Gfx.Game[id]);
+                Parallax parallax = null;
+                if (Gfx.Game.Has(id))
+                {
+                    parallax = new Parallax(Gfx.Game[id]);
+                }else
+                {
+                    parallax = new Parallax(Gfx.Misc[id]);
+                }
                 backdrop = (Backdrop)parallax;
                 string str2 = "";
                 if (child.HasAttr("blendmode"))
