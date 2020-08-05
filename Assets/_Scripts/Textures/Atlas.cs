@@ -22,6 +22,11 @@ public class Atlas
         return atlas;
     }
 
+    public bool Has(string id)
+    {
+        return this.textures.ContainsKey(id);
+    }
+
     public MTexture this[string id]
     {
         get
@@ -162,7 +167,7 @@ public class Atlas
                     {
                         string str = binaryReader.ReadString();
                         string filePath = Path.Combine(Util.GAME_PATH_CONTENT, Path.GetDirectoryName(path), str + ".data");
-                        Texture2D texture2D = ReadData(str+".data");
+                        Texture2D texture2D = ReadData(filePath);
                         //Texture2D texture2 = null;//VirtualContent.CreateTexture(Path.Combine(Path.GetDirectoryName(path), str + ".data"));
                         atlas.Sources.Add(texture2D);
                         //byte[] _bytes = texture2D.EncodeToPNG();
@@ -198,47 +203,49 @@ public class Atlas
                     }
                     break;
                 }
-            //case Atlas.AtlasDataFormat.PackerNoAtlas:
-            //    using (FileStream fileStream = File.OpenRead(Path.Combine(Engine.ContentDirectory, path + ".meta")))
-            //    {
-            //        BinaryReader binaryReader = new BinaryReader((Stream)fileStream);
-            //        binaryReader.ReadInt32();
-            //        binaryReader.ReadString();
-            //        binaryReader.ReadInt32();
-            //        short num1 = binaryReader.ReadInt16();
-            //        for (int index1 = 0; index1 < (int)num1; ++index1)
-            //        {
-            //            string path2_2 = binaryReader.ReadString();
-            //            string path1 = Path.Combine(Path.GetDirectoryName(path), path2_2);
-            //            short num2 = binaryReader.ReadInt16();
-            //            for (int index2 = 0; index2 < (int)num2; ++index2)
-            //            {
-            //                string index3 = binaryReader.ReadString().Replace('\\', '/');
-            //                binaryReader.ReadInt16();
-            //                binaryReader.ReadInt16();
-            //                binaryReader.ReadInt16();
-            //                binaryReader.ReadInt16();
-            //                short num3 = binaryReader.ReadInt16();
-            //                short num4 = binaryReader.ReadInt16();
-            //                short num5 = binaryReader.ReadInt16();
-            //                short num6 = binaryReader.ReadInt16();
-            //                VirtualTexture texture2 = VirtualContent.CreateTexture(Path.Combine(path1, index3 + ".data"));
-            //                atlas.Sources.Add(texture2);
-            //                atlas.textures[index3] = new MTexture(texture2, new Vector2((float)-num3, (float)-num4), (int)num5, (int)num6);
-            //                atlas.textures[index3].AtlasPath = index3;
-            //            }
-            //        }
-            //        if (fileStream.Position >= fileStream.Length || !(binaryReader.ReadString() == "LINKS"))
-            //            break;
-            //        short num7 = binaryReader.ReadInt16();
-            //        for (int index = 0; index < (int)num7; ++index)
-            //        {
-            //            string key = binaryReader.ReadString();
-            //            string str = binaryReader.ReadString();
-            //            atlas.links.Add(key, str);
-            //        }
-            //        break;
-            //    }
+            case Atlas.AtlasDataFormat.PackerNoAtlas:
+                using (FileStream fileStream = File.OpenRead(Path.Combine(Util.GAME_PATH_CONTENT, path + ".meta")))
+                {
+                    BinaryReader binaryReader = new BinaryReader((Stream)fileStream);
+                    binaryReader.ReadInt32();
+                    binaryReader.ReadString();
+                    binaryReader.ReadInt32();
+                    short num1 = binaryReader.ReadInt16();
+                    for (int index1 = 0; index1 < (int)num1; ++index1)
+                    {
+                        string path2_2 = binaryReader.ReadString();
+                        string path1 = Path.Combine(Path.GetDirectoryName(path), path2_2);
+                        short num2 = binaryReader.ReadInt16();
+                        for (int index2 = 0; index2 < (int)num2; ++index2)
+                        {
+                            string str = binaryReader.ReadString().Replace('\\', '/');
+                            binaryReader.ReadInt16();
+                            binaryReader.ReadInt16();
+                            binaryReader.ReadInt16();
+                            binaryReader.ReadInt16();
+                            short num3 = binaryReader.ReadInt16();
+                            short num4 = binaryReader.ReadInt16();
+                            short num5 = binaryReader.ReadInt16();
+                            short num6 = binaryReader.ReadInt16();
+                            string filePath = Path.Combine(Util.GAME_PATH_CONTENT, path1, str + ".data");
+                            Texture2D texture2D = ReadData(filePath);
+                            atlas.Sources.Add(texture2D);
+                            MTexture parent2 = new MTexture(texture2D);
+                            atlas.textures[str] = new MTexture(parent2, -num3, -num4, (int)num5, (int)num6);
+                            atlas.textures[str].AtlasPath = str;
+                        }
+                    }
+                    if (fileStream.Position >= fileStream.Length || !(binaryReader.ReadString() == "LINKS"))
+                        break;
+                    short num7 = binaryReader.ReadInt16();
+                    for (int index = 0; index < (int)num7; ++index)
+                    {
+                        string key = binaryReader.ReadString();
+                        string str = binaryReader.ReadString();
+                        atlas.links.Add(key, str);
+                    }
+                    break;
+                }
             default:
                 throw new NotImplementedException();
         }
@@ -283,7 +290,7 @@ public class Atlas
 
     public static Texture2D ReadData(string path)
     {
-        using (FileStream stream = File.OpenRead(Path.Combine(Util.GAME_PATH_CONTENT,"Graphics","Atlases", path)))
+        using (FileStream stream = File.OpenRead(path))
         {
             byte[] buffer;
             byte[] buffer2 = new byte[0x4000000];

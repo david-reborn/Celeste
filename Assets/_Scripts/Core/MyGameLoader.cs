@@ -21,6 +21,8 @@ public class MyGameLoader : MonoBehaviour
     {
         //读取配置文件
         Gfx.Game = Atlas.FromAtlas(Path.Combine("Graphics", "Atlases", "Gameplay"), Atlas.AtlasDataFormat.Packer);
+        Gfx.Misc = Atlas.FromAtlas(Path.Combine("Graphics", "Atlases", "Misc"), Atlas.AtlasDataFormat.PackerNoAtlas);
+
         Gfx.SceneryTiles = new Tileset(Gfx.Game["tilesets/scenery"], 8, 8);
         //读取前景配置文件
         Gfx.BGAutotiler = new Autotiler(Path.Combine("Graphics", "BackgroundTiles.xml"));
@@ -315,13 +317,16 @@ public class MyGameLoader : MonoBehaviour
 
         BackdropRenderer backgroundRenderer = new BackdropRenderer();
         backgroundRenderer.Backdrops = mapData.CreateBackdrops(mapData.Background);
+
+        BackdropRenderer foregroundRenderer = new BackdropRenderer();
+        foregroundRenderer.Backdrops = mapData.CreateBackdrops(mapData.Foreground);
         //foreach(Backdrop backdrop in backgroundRenderer.Backdrops)
         //{
         //    if(backdrop is Parallax)
         //    {
         //        ShowSprite((backdrop as Parallax).Texture);
         //    }
-            
+
         //}
         //StartCoroutine(DrawTiles(backgroundTiles.Tiles, Vector3.zero));
 
