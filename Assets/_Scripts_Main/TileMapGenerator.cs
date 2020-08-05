@@ -11,7 +11,8 @@ namespace myd.celeste.demo
     public class TileMapGenerator : MonoBehaviour
     {
         public Grid grid;
-        public Tilemap tilemap;
+        public Tilemap fgTilemap;
+        public Tilemap bgTilemap;
 
         public SolidTile tile;
         private byte[] adjacent = new byte[9];
@@ -26,8 +27,6 @@ namespace myd.celeste.demo
             AreaData.Load();
             Stage stage = new Stage(0, AreaMode.Normal);
             stage.Load();
-
-            VirtualMap<char> foregroundData = stage.ForegroundData;
 
             Dictionary<char, XmlElement> dictionary = new Dictionary<char, XmlElement>();
             XmlDocument doc = new XmlDocument();
@@ -65,11 +64,14 @@ namespace myd.celeste.demo
                 EdgesIgnoreOutOfLevel = false,
                 PaddingIgnoreOutOfLevel = true
             };
-            GenerateTiles(foregroundData, 0, 0, foregroundData.Columns, foregroundData.Rows, false, '0', behaviour);
+            VirtualMap<char> foregroundData = stage.ForegroundData;
+            VirtualMap<char> backgroundData = stage.BackgroundData;
+            GenerateTiles(this.fgTilemap, foregroundData, 0, 0, foregroundData.Columns, foregroundData.Rows, false, '0', behaviour);
+            GenerateTiles(this.bgTilemap, backgroundData, 0, 0, backgroundData.Columns, backgroundData.Rows, false, '0', behaviour);
         }
 
         
-        private void GenerateTiles(VirtualMap<char> foregroundData, int startX, int startY, int tilesX, int tilesY, bool forceSolid, char forceID, Autotiler.Behaviour behaviour)
+        private void GenerateTiles(Tilemap tilemap, VirtualMap<char> foregroundData, int startX, int startY, int tilesX, int tilesY, bool forceSolid, char forceID, Autotiler.Behaviour behaviour)
         {
             Rectangle forceFill = Rectangle.Empty;
             if (forceSolid)
@@ -97,7 +99,7 @@ namespace myd.celeste.demo
                                     {
                                         SolidTile tile = ScriptableObject.CreateInstance<SolidTile>();
                                         tile.SetTile(tiles);
-                                        this.tilemap.SetTile(new Vector3Int(x2 - startX, -(y2 - startY), 0), tile);
+                                        tilemap.SetTile(new Vector3Int(x2 - startX, -(y2 - startY), 0), tile);
                                         //this.tilemap.SetTile(new Vector3Int(0, 0, 0), tile);
                                         //return;
                                     }
@@ -124,7 +126,7 @@ namespace myd.celeste.demo
                         {
                             SolidTile tile = ScriptableObject.CreateInstance<SolidTile>();
                             tile.SetTile(tiles);
-                            this.tilemap.SetTile(new Vector3Int(x - startX, -(y - startY), 0), tile);
+                            tilemap.SetTile(new Vector3Int(x - startX, -(y - startY), 0), tile);
                             //this.tilemap.SetTile(new Vector3Int(0, 0, 0), tile);
                             //return;
                         }
