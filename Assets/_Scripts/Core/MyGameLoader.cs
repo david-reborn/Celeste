@@ -315,11 +315,11 @@ public class MyGameLoader : MonoBehaviour
             backgroundTiles.Tiles.Overlay(Gfx.SceneryTiles, tiles, l8 - tileBounds1.X, t8 - tileBounds1.Y);
         }
 
-        BackdropRenderer backgroundRenderer = new BackdropRenderer();
-        backgroundRenderer.Backdrops = mapData.CreateBackdrops(mapData.Background);
+        //BackdropRenderer backgroundRenderer = new BackdropRenderer();
+        //backgroundRenderer.Backdrops = mapData.CreateBackdrops(mapData.Background);
 
-        BackdropRenderer foregroundRenderer = new BackdropRenderer();
-        foregroundRenderer.Backdrops = mapData.CreateBackdrops(mapData.Foreground);
+        //BackdropRenderer foregroundRenderer = new BackdropRenderer();
+        //foregroundRenderer.Backdrops = mapData.CreateBackdrops(mapData.Foreground);
         //foreach(Backdrop backdrop in backgroundRenderer.Backdrops)
         //{
         //    if(backdrop is Parallax)

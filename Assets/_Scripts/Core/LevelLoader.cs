@@ -347,7 +347,6 @@ namespace myd.celeste
             //this.Level.StartPosition = this.startPosition;
             //this.Level.Pathfinder = new Pathfinder(this.Level);
             //this.Loaded = true;
-
         }
 
         private VirtualMap<char> ReadMapChar(string tiles, int width, int height)

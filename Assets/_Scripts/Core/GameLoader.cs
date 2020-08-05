@@ -85,12 +85,11 @@ namespace myd.celeste.ext
                     {
                         continue;
                     }
-                    mTexture = tileGrid.Tiles[left, top];
                     count++;
                     GameObject gb = Instantiate(spritePrefab);
                     gb.transform.SetParent(this.transform, false);
                     gb.GetComponent<SpriteRenderer>().sprite = mTexture.GetSprite();
-                    gb.transform.position = new Vector3((float)(left * tileGrid.TileWidth)/100f, -(float)(top * tileGrid.TileHeight) / 100f, 0);
+                    gb.transform.position = new Vector3((float)(left * tileGrid.TileWidth), -(float)(top * tileGrid.TileHeight), 0);
                     //backgroundTiles.Tiles.Tiles[left, top].USprite;
                     //backgroundTiles.Tiles.Tiles[left, top]?.Draw(new Vector2((float)(left * backgroundTiles.Tiles.TileWidth), (float)(top * backgroundTiles.Tiles.TileHeight))), Vector2.zero, color);
                     //Debug.Log(left+","+top);

@@ -425,6 +425,7 @@ public class Atlas
                 }
             }
             texture.SetPixels32(0, 0, width, height, tempColors);
+            texture.filterMode = FilterMode.Point;
             texture.Apply();
             //byte[] _bytes = texture.EncodeToPNG();
             //System.IO.File.WriteAllBytes("F://" + path, _bytes);
