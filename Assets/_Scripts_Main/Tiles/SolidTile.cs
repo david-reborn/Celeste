@@ -30,7 +30,11 @@ namespace myd.celeste.demo
             //m.SetTRS(Vector3.zero, GetRotation((byte)mask), Vector3.one);
             //tileData.transform = m;
             tileData.flags = TileFlags.LockTransform;
-            tileData.colliderType = ColliderType.None;
+            tileData.colliderType = this.colliderType;
+            if (this.colliderType == ColliderType.None)
+            {
+                Debug.Log(111);
+            }
         }
 
         public override bool StartUp(Vector3Int position, ITilemap tilemap, GameObject go)

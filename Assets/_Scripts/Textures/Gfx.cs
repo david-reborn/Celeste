@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using myd.celeste.demo;
 
 namespace myd.celeste
 {
@@ -12,5 +13,7 @@ namespace myd.celeste
         public static AnimatedTilesBank AnimatedTilesBank;
 
         public static Tileset SceneryTiles;
+
+        public static SpriteBank SpriteBank;
     }
 }

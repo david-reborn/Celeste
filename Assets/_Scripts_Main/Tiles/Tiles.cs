@@ -10,12 +10,12 @@ using UnityEngine.Tilemaps;
 
 namespace myd.celeste.demo
 {
-    public class TileDictionary
+    public class Tiles
     {
         private byte[] adjacent = new byte[9];
         private Dictionary<char, Autotiler.TerrainType> lookup = new Dictionary<char, Autotiler.TerrainType>();
 
-        public TileDictionary(string path)
+        public Tiles(string path)
         {
             Dictionary<char, XmlElement> dictionary = new Dictionary<char, XmlElement>();
             XmlDocument doc = new XmlDocument();
@@ -116,7 +116,7 @@ namespace myd.celeste.demo
             }));
         }
 
-        public void GenerateTiles(Tilemap tilemap, VirtualMap<char> foregroundData, int startX, int startY, int tilesX, int tilesY, bool forceSolid, char forceID, Autotiler.Behaviour behaviour)
+        public void GenerateTiles(Tilemap tilemap, VirtualMap<char> foregroundData, int startX, int startY, int tilesX, int tilesY, bool forceSolid, char forceID, Autotiler.Behaviour behaviour, ColliderGrid colliderGrid)
         {
             Rectangle forceFill = Rectangle.Empty;
             if (forceSolid)
@@ -144,6 +144,7 @@ namespace myd.celeste.demo
                                     {
                                         SolidTile tile = ScriptableObject.CreateInstance<SolidTile>();
                                         tile.SetTile(tiles);
+                                        tile.colliderType = colliderGrid[x2 - startX, y2 - startY]? Tile.ColliderType.Grid:Tile.ColliderType.None;
                                         tilemap.SetTile(new Vector3Int(x2 - startX, -(y2 - startY), 0), tile);
                                         //this.tilemap.SetTile(new Vector3Int(0, 0, 0), tile);
                                         //return;
@@ -171,6 +172,7 @@ namespace myd.celeste.demo
                         {
                             SolidTile tile = ScriptableObject.CreateInstance<SolidTile>();
                             tile.SetTile(tiles);
+                            tile.colliderType = colliderGrid[x - startX, y - startY] ? Tile.ColliderType.Grid : Tile.ColliderType.None;
                             tilemap.SetTile(new Vector3Int(x - startX, -(y - startY), 0), tile);
                             //this.tilemap.SetTile(new Vector3Int(0, 0, 0), tile);
                             //return;

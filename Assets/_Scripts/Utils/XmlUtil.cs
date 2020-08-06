@@ -12,8 +12,6 @@ public static class XmlUtils
     {
         XmlDocument xmlDocument = new XmlDocument();
         xmlDocument.Load(Path.Combine(Util.GAME_PATH_CONTENT, filename));
-        //using (FileStream inStream = TitleContainer.OpenStream(Path.Combine(Engine.Instance.Content.RootDirectory, filename)))
-        //    xmlDocument.Load(inStream);
         return xmlDocument;
     }
 
@@ -101,5 +99,33 @@ public static class XmlUtils
       string defaultValue)
     {
         return !xml.HasAttr(attributeName) ? Util.HexToColor(defaultValue) : xml.AttrHexColor(attributeName);
+    }
+
+    public static bool HasChild(this XmlElement xml, string childName)
+    {
+        return xml[childName] != null;
+    }
+
+    public static Vector2 Position(this XmlElement xml)
+    {
+        return new Vector2(xml.AttrFloat("x"), xml.AttrFloat("y"));
+    }
+
+    public static Vector2 Position(this XmlElement xml, Vector2 defaultPosition)
+    {
+        return new Vector2(xml.AttrFloat("x", defaultPosition.x), xml.AttrFloat("y", defaultPosition.y));
+    }
+
+    public static Vector2 ChildPosition(this XmlElement xml, string childName)
+    {
+        return xml[childName].Position();
+    }
+
+    public static Vector2 ChildPosition(
+      this XmlElement xml,
+      string childName,
+      Vector2 defaultValue)
+    {
+        return xml.HasChild(childName) ? xml[childName].Position(defaultValue) : defaultValue;
     }
 }

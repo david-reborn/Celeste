@@ -34,8 +34,12 @@ namespace myd.celeste
         {
             return Math.Min(Math.Max(value, min), max);
         }
-
         public static string Attr(this XmlElement xml, string attributeName)
+        {
+            return xml.Attributes[attributeName].InnerText;
+        }
+
+        public static string Attr(this XmlElement xml, string attributeName, string v)
         {
             return xml.Attributes[attributeName]?.InnerText;
         }
