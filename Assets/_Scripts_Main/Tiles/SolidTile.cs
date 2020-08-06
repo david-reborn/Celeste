@@ -15,11 +15,11 @@ namespace myd.celeste.demo
     public class SolidTile : Tile
     {
         private Autotiler.Tiles tiles;
-
         public void SetTile(Autotiler.Tiles tiles)
         {
             this.tiles = tiles;
         }
+
 
         public override void GetTileData(Vector3Int location, ITilemap tilemap, ref TileData tileData)
         {
@@ -30,7 +30,7 @@ namespace myd.celeste.demo
             //m.SetTRS(Vector3.zero, GetRotation((byte)mask), Vector3.one);
             //tileData.transform = m;
             tileData.flags = TileFlags.LockTransform;
-            tileData.colliderType = ColliderType.None;
+            tileData.colliderType = colliderType;
         }
 
         public override bool StartUp(Vector3Int position, ITilemap tilemap, GameObject go)
