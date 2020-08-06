@@ -96,8 +96,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   spriteRenderer: {fileID: 0}
   Position: {x: 0, y: 0}
-  Rate: 0
+  Rate: 1
   UseRawDeltaTime: 0
   Path: 
   Origin: {x: 0, y: 0}
-  HairCount: 0
+  Scale: {x: 1, y: 1}
+  HairCount: 4

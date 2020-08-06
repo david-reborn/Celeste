@@ -39,10 +39,11 @@ namespace myd.celeste
             return xml.Attributes[attributeName].InnerText;
         }
 
-        public static string Attr(this XmlElement xml, string attributeName, string v)
+        public static string Attr(this XmlElement xml, string attributeName, string defaultValue)
         {
-            return xml.Attributes[attributeName]?.InnerText;
+            return !xml.HasAttr(attributeName) ? defaultValue : xml.Attributes[attributeName].InnerText;
         }
+
         public static bool HasAttr(this XmlElement xml, string attributeName)
         {
             return xml.Attributes[attributeName] != null;

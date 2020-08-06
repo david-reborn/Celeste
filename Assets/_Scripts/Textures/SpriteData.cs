@@ -19,7 +19,8 @@ namespace myd.celeste.demo
 
         public SpriteData(Atlas atlas)
         {
-            this.Sprite = Resources.Load<UnitSprite>("UnitSprite");
+            UnitSprite spritePrefab = Resources.Load<UnitSprite>("UnitSprite");
+            Sprite = GameObject.Instantiate<UnitSprite>(spritePrefab);
             this.Sprite.Init(atlas, "");
             this.Atlas = atlas;
         }
@@ -55,30 +56,30 @@ namespace myd.celeste.demo
                 string path = string.IsNullOrEmpty(overridePath) || !this.HasFrames(this.Atlas, overridePath + str2, frames) ? str1 + str2 : overridePath + str2;
                 this.Sprite.Add(id, path, xml1.AttrFloat("delay", defaultValue), into, frames);
             }
-            //foreach (XmlElement xml1 in spriteDataSource.XML.GetElementsByTagName("Loop"))
-            //{
-            //    string id = xml1.Attr("id");
-            //    string str2 = xml1.Attr("path", "");
-            //    int[] frames = Util.ReadCSVIntWithTricks(xml1.Attr("frames", ""));
-            //    string path = string.IsNullOrEmpty(overridePath) || !this.HasFrames(this.Atlas, overridePath + str2, frames) ? str1 + str2 : overridePath + str2;
-            //    this.Sprite.AddLoop(id, path, xml1.AttrFloat("delay", defaultValue), frames);
-            //}
-            //if (spriteDataSource.XML.HasChild("Center"))
-            //{
-            //    this.Sprite.CenterOrigin();
-            //    this.Sprite.Justify = new Vector2?(new Vector2(0.5f, 0.5f));
-            //}
-            //else if (spriteDataSource.XML.HasChild("Justify"))
-            //{
-            //    this.Sprite.JustifyOrigin(spriteDataSource.XML.ChildPosition("Justify"));
-            //    this.Sprite.Justify = new Vector2?(spriteDataSource.XML.ChildPosition("Justify"));
-            //}
-            //else if (spriteDataSource.XML.HasChild("Origin"))
-            //    this.Sprite.Origin = spriteDataSource.XML.ChildPosition("Origin");
-            //if (spriteDataSource.XML.HasChild("Position"))
-            //    this.Sprite.Position = spriteDataSource.XML.ChildPosition("Position");
-            //if (spriteDataSource.XML.HasAttr("start"))
-            //    this.Sprite.Play(spriteDataSource.XML.Attr("start"), false, false);
+            foreach (XmlElement xml1 in spriteDataSource.XML.GetElementsByTagName("Loop"))
+            {
+                string id = xml1.Attr("id");
+                string str2 = xml1.Attr("path", "");
+                int[] frames = Util.ReadCSVIntWithTricks(xml1.Attr("frames", ""));
+                string path = string.IsNullOrEmpty(overridePath) || !this.HasFrames(this.Atlas, overridePath + str2, frames) ? str1 + str2 : overridePath + str2;
+                this.Sprite.AddLoop(id, path, xml1.AttrFloat("delay", defaultValue), frames);
+            }
+            if (spriteDataSource.XML.HasChild("Center"))
+            {
+                this.Sprite.CenterOrigin();
+                this.Sprite.Justify = new Vector2?(new Vector2(0.5f, 0.5f));
+            }
+            else if (spriteDataSource.XML.HasChild("Justify"))
+            {
+                this.Sprite.JustifyOrigin(spriteDataSource.XML.ChildPosition("Justify"));
+                this.Sprite.Justify = new Vector2?(spriteDataSource.XML.ChildPosition("Justify"));
+            }
+            else if (spriteDataSource.XML.HasChild("Origin"))
+                this.Sprite.Origin = spriteDataSource.XML.ChildPosition("Origin");
+            if (spriteDataSource.XML.HasChild("Position"))
+                this.Sprite.Position = spriteDataSource.XML.ChildPosition("Position");
+            if (spriteDataSource.XML.HasAttr("start"))
+                this.Sprite.Play(spriteDataSource.XML.Attr("start"), false, false);
             this.Sources.Add(spriteDataSource);
         }
 

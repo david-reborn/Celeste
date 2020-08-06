@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml;
 using UnityEngine;
 
 namespace myd.celeste.demo
@@ -10,7 +11,8 @@ namespace myd.celeste.demo
     public class PlayerSprite : UnitSprite
     {
         private static Dictionary<string, PlayerAnimMetadata> FrameMetadata = new Dictionary<string, PlayerAnimMetadata>((IEqualityComparer<string>)StringComparer.OrdinalIgnoreCase);
-        [HideInInspector]
+
+        public Vector2 Scale = Vector2.one;
         public int HairCount = 4;
         public const string Idle = "idle";
         public const string Shaking = "shaking";
@@ -112,14 +114,14 @@ namespace myd.celeste.demo
         //    }
         //}
 
-        //public int HairFrame
-        //{
-        //    get
-        //    {
-        //        PlayerAnimMetadata playerAnimMetadata;
-        //        return this.Texture != null && PlayerSprite.FrameMetadata.TryGetValue(this.Texture.AtlasPath, out playerAnimMetadata) ? playerAnimMetadata.Frame : 0;
-        //    }
-        //}
+        public int HairFrame
+        {
+            get
+            {
+                PlayerAnimMetadata playerAnimMetadata;
+                return this.Texture != null && PlayerSprite.FrameMetadata.TryGetValue(this.Texture.AtlasPath, out playerAnimMetadata) ? playerAnimMetadata.Frame : 0;
+            }
+        }
 
         //public bool HasHair
         //{
@@ -156,54 +158,54 @@ namespace myd.celeste.demo
         //    this.RenderPosition = renderPosition;
         //}
 
-        //public static void CreateFramesMetadata(string sprite)
-        //{
-        //    foreach (SpriteDataSource source in GFX.SpriteBank.SpriteData[sprite].Sources)
-        //    {
-        //        XmlElement xmlElement = source.XML["Metadata"];
-        //        string str1 = source.Path;
-        //        if (xmlElement != null)
-        //        {
-        //            if (!string.IsNullOrEmpty(source.OverridePath))
-        //                str1 = source.OverridePath;
-        //            foreach (XmlElement xml in xmlElement.GetElementsByTagName("Frames"))
-        //            {
-        //                string str2 = str1 + xml.Attr("path", "");
-        //                string[] strArray1 = xml.Attr("hair").Split('|');
-        //                string[] strArray2 = xml.Attr("carry", "").Split(',');
-        //                for (int index = 0; index < Math.Max(strArray1.Length, strArray2.Length); ++index)
-        //                {
-        //                    PlayerAnimMetadata playerAnimMetadata = new PlayerAnimMetadata();
-        //                    string id = str2 + (index < 10 ? (object)"0" : (object)"") + (object)index;
-        //                    if (index == 0 && !GFX.Game.Has(id))
-        //                        id = str2;
-        //                    PlayerSprite.FrameMetadata[id] = playerAnimMetadata;
-        //                    if (index < strArray1.Length)
-        //                    {
-        //                        if (strArray1[index].Equals("x", StringComparison.OrdinalIgnoreCase) || strArray1[index].Length <= 0)
-        //                        {
-        //                            playerAnimMetadata.HasHair = false;
-        //                        }
-        //                        else
-        //                        {
-        //                            string[] strArray3 = strArray1[index].Split(':');
-        //                            string[] strArray4 = strArray3[0].Split(',');
-        //                            playerAnimMetadata.HasHair = true;
-        //                            playerAnimMetadata.HairOffset = new Vector2((float)Convert.ToInt32(strArray4[0]), (float)Convert.ToInt32(strArray4[1]));
-        //                            playerAnimMetadata.Frame = strArray3.Length >= 2 ? Convert.ToInt32(strArray3[1]) : 0;
-        //                        }
-        //                    }
-        //                    if (index < strArray2.Length && strArray2[index].Length > 0)
-        //                        playerAnimMetadata.CarryYOffset = int.Parse(strArray2[index]);
-        //                }
-        //            }
-        //        }
-        //    }
-        //}
+        public static void CreateFramesMetadata(string sprite)
+        {
+            foreach (SpriteDataSource source in Gfx.SpriteBank.SpriteData[sprite].Sources)
+            {
+                XmlElement xmlElement = source.XML["Metadata"];
+                string str1 = source.Path;
+                if (xmlElement != null)
+                {
+                    if (!string.IsNullOrEmpty(source.OverridePath))
+                        str1 = source.OverridePath;
+                    foreach (XmlElement xml in xmlElement.GetElementsByTagName("Frames"))
+                    {
+                        string str2 = str1 + xml.Attr("path", "");
+                        string[] strArray1 = xml.Attr("hair").Split('|');
+                        string[] strArray2 = xml.Attr("carry", "").Split(',');
+                        for (int index = 0; index < Math.Max(strArray1.Length, strArray2.Length); ++index)
+                        {
+                            PlayerAnimMetadata playerAnimMetadata = new PlayerAnimMetadata();
+                            string id = str2 + (index < 10 ? (object)"0" : (object)"") + (object)index;
+                            if (index == 0 && !Gfx.Game.Has(id))
+                                id = str2;
+                            PlayerSprite.FrameMetadata[id] = playerAnimMetadata;
+                            if (index < strArray1.Length)
+                            {
+                                if (strArray1[index].Equals("x", StringComparison.OrdinalIgnoreCase) || strArray1[index].Length <= 0)
+                                {
+                                    playerAnimMetadata.HasHair = false;
+                                }
+                                else
+                                {
+                                    string[] strArray3 = strArray1[index].Split(':');
+                                    string[] strArray4 = strArray3[0].Split(',');
+                                    playerAnimMetadata.HasHair = true;
+                                    playerAnimMetadata.HairOffset = new Vector2((float)Convert.ToInt32(strArray4[0]), (float)Convert.ToInt32(strArray4[1]));
+                                    playerAnimMetadata.Frame = strArray3.Length >= 2 ? Convert.ToInt32(strArray3[1]) : 0;
+                                }
+                            }
+                            if (index < strArray2.Length && strArray2[index].Length > 0)
+                                playerAnimMetadata.CarryYOffset = int.Parse(strArray2[index]);
+                        }
+                    }
+                }
+            }
+        }
 
-        //public static void ClearFramesMetadata()
-        //{
-        //    PlayerSprite.FrameMetadata.Clear();
-        //}
+        public static void ClearFramesMetadata()
+        {
+            PlayerSprite.FrameMetadata.Clear();
+        }
     }
 }

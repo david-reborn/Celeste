@@ -256,6 +256,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 375ae259dd9c58444b2e58de95369b77, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  spritePrefab: {fileID: 6022273278204485587, guid: 7b0c49e6730b9a74ebae344061407f88,
+    type: 3}
   player: {fileID: 0}
 --- !u!1 &2055976871
 GameObject:

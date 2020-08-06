@@ -15,7 +15,6 @@ namespace myd.celeste.demo
         public SpriteRenderer spriteRenderer = null;
         [HideInInspector]
         public Vector2 Position;
-        [HideInInspector]
         public float Rate = 1f;
         [HideInInspector]
         public bool UseRawDeltaTime;
@@ -79,7 +78,7 @@ namespace myd.celeste.demo
             
         }
 
-        private void Start()
+        private void Awake()
         {
             spriteRenderer = this.GetComponent<SpriteRenderer>();
         }
@@ -140,7 +139,7 @@ namespace myd.celeste.demo
             if (texture == this.Texture)
                 return;
             this.Texture = texture;
-            this.spriteRenderer.sprite = texture.USprite;
+            this.spriteRenderer.sprite = texture.GetSprite();
             if (this.width == 0)
                 this.width = texture.Width;
             if (this.height == 0)
@@ -153,6 +152,36 @@ namespace myd.celeste.demo
             if (this.OnFrameChange == null)
                 return;
             this.OnFrameChange(this.CurrentAnimationID);
+        }
+
+        public void AddLoop(string id, string path, float delay)
+        {
+            this.animations[id] = new Animation()
+            {
+                Delay = delay,
+                Frames = this.GetFrames(path, (int[])null),
+                Goto = new Chooser<string>(id, 1f)
+            };
+        }
+
+        public void AddLoop(string id, string path, float delay, params int[] frames)
+        {
+            this.animations[id] = new Animation()
+            {
+                Delay = delay,
+                Frames = this.GetFrames(path, frames),
+                Goto = new Chooser<string>(id, 1f)
+            };
+        }
+
+        public void AddLoop(string id, float delay, params MTexture[] frames)
+        {
+            this.animations[id] = new Animation()
+            {
+                Delay = delay,
+                Frames = frames,
+                Goto = new Chooser<string>(id, 1f)
+            };
         }
 
         public void Add(string id, string path)
@@ -312,6 +341,20 @@ namespace myd.celeste.demo
             clone.LastAnimationID = this.LastAnimationID;
             clone.CurrentAnimationFrame = this.CurrentAnimationFrame;
             return clone;
+        }
+
+        public UnitSprite CenterOrigin()
+        {
+            this.Origin.x = this.Width / 2f;
+            this.Origin.y = this.Height / 2f;
+            return this;
+        }
+
+        public UnitSprite JustifyOrigin(Vector2 at)
+        {
+            this.Origin.x = this.Width * at.x;
+            this.Origin.y = this.Height * at.y;
+            return this;
         }
 
         private class Animation

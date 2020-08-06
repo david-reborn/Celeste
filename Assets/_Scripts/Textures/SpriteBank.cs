@@ -31,15 +31,16 @@ namespace myd.celeste.demo
                     if (this.SpriteData.ContainsKey(xml1.Name))
                         throw new Exception("Duplicate sprite name in SpriteData: '" + xml1.Name + "'!");
                     SpriteData spriteData = this.SpriteData[xml1.Name] = new SpriteData(this.Atlas);
-                    //if (xml1.HasAttr("copy"))
-                    //    spriteData.Add(dictionary[xml1.Attr("copy")], xml1.Attr("path"));
-                    //spriteData.Add(xml1, (string)null);
+                    if (xml1.HasAttr("copy"))
+                        spriteData.Add(dictionary[xml1.Attr("copy")], xml1.Attr("path"));
+                    spriteData.Add(xml1, (string)null);
                 }
             }
         }
 
         public SpriteBank(Atlas atlas, string xmlPath):this(atlas, XmlUtils.LoadContentXML(xmlPath))
         {
+
         }
 
         public bool Has(string id)
