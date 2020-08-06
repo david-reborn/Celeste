@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System;
 using System.Xml;
 using System.IO;
+using myd.celeste.demo;
 
 namespace myd.celeste
 {
@@ -37,7 +38,7 @@ namespace myd.celeste
         public bool IsFinal;
         public string CompleteScreenName;
         public ModeProperties[] Mode;
-        public Player.IntroTypes IntroType;
+        public IntroTypes IntroType;
         public bool Dreaming;
         public string ColorGrade;
         public Action<Scene, bool, Action> Wipe;
@@ -73,7 +74,7 @@ namespace myd.celeste
             areaData1.TitleBaseColor = Util.HexToColor("383838");
             areaData1.TitleAccentColor = Util.HexToColor("50AFAE");
             areaData1.TitleTextColor = Color.white;
-            areaData1.IntroType = Player.IntroTypes.WalkInRight;
+            areaData1.IntroType = IntroTypes.WalkInRight;
             areaData1.Dreaming = false;
             areaData1.ColorGrade = (string)null;
             //CurtainWipe curtainWipe1;

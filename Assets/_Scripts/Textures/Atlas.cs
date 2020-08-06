@@ -288,6 +288,12 @@ public class Atlas
         return (MTexture)null;
     }
 
+    public MTexture GetAtlasSubtexturesAt(string key, int index)
+    {
+        List<MTexture> mtextureList;
+        return this.orderedTexturesCache.TryGetValue(key, out mtextureList) ? mtextureList[index] : this.GetAtlasSubtextureFromAtlasAt(key, index);
+    }
+
     public static Texture2D ReadData(string path)
     {
         using (FileStream stream = File.OpenRead(path))
