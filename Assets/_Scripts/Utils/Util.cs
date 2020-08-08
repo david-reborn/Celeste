@@ -82,19 +82,40 @@ namespace myd.celeste
             return Sprite.Create(parent.texture, bounds.Bounds, new Vector2(0.5f, 0.5f));
         }
 
-
-
         public static Color HexToColor(string hex)
         {
-            if (hex.Length >= 6)
-            {
-                int r = HexToByte(hex[0]) * 16 + HexToByte(hex[1]);
-                int g = HexToByte(hex[2]) * 16 + HexToByte(hex[3]);
-                int b = HexToByte(hex[4]) * 16 + HexToByte(hex[5]);
-                return new Color(r, g, b);
-            }
-            return Color.white;
+            int startIndex = 0;
+            if (hex.Length >= 1 && hex[0] == '#')
+                startIndex = 1;
+            if (hex.Length - startIndex >= 6)
+                return new Color((float)((int)Util.HexToByte(hex[startIndex]) * 16 + (int)Util.HexToByte(hex[startIndex + 1])) / (float)byte.MaxValue, (float)((int)Util.HexToByte(hex[startIndex + 2]) * 16 + (int)Util.HexToByte(hex[startIndex + 3])) / (float)byte.MaxValue, (float)((int)Util.HexToByte(hex[startIndex + 4]) * 16 + (int)Util.HexToByte(hex[startIndex + 5])) / (float)byte.MaxValue);
+            int result;
+            return int.TryParse(hex.Substring(startIndex), out result) ? Util.HexToColor(result) : Color.white;
         }
+
+        //public static Color HexToColor(string hex)
+        //{
+        //    if (hex.Length >= 6)
+        //    {
+        //        int r = HexToByte(hex[0]) * 16 + HexToByte(hex[1]);
+        //        int g = HexToByte(hex[2]) * 16 + HexToByte(hex[3]);
+        //        int b = HexToByte(hex[4]) * 16 + HexToByte(hex[5]);
+        //        return new Color(r, g, b);
+        //    }
+        //    return Color.white;
+        //}
+
+        public static Color HexToColor(int hex)
+        {
+            return new Color()
+            {
+                a = byte.MaxValue,
+                r = (byte)(hex >> 16),
+                g = (byte)(hex >> 8),
+                b = (byte)hex
+            };
+        }
+
         public static byte HexToByte(char c)
         {
             return (byte)"0123456789ABCDEF".IndexOf(char.ToUpper(c));
@@ -244,5 +265,15 @@ namespace myd.celeste
             return new Vector2((float)(int)Math.Floor((double)val.x), (float)(int)Math.Floor((double)val.y));
         }
 
+        public static Vector2 Approach(Vector2 val, Vector2 target, float maxMove)
+        {
+            if ((double)maxMove == 0.0 || val == target)
+                return val;
+            Vector2 vector2 = target - val;
+            if ((double)vector2.magnitude < (double)maxMove)
+                return target;
+            vector2.Normalize();
+            return val + vector2 * maxMove;
+        }
     }
 }

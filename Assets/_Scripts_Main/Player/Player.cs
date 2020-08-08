@@ -39,8 +39,8 @@ namespace myd.celeste.demo
         {
             if (Input.GetKeyUp(KeyCode.Alpha1))
             {
-                string id = Player.idleColdOptions.Choose();
-                this.Sprite.Play(id, false, false);
+                //string id = Player.idleColdOptions.Choose();
+                //this.Sprite.Play(id, false, false);
             }
         }
     }

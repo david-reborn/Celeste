@@ -7,12 +7,9 @@ using UnityEngine;
 
 namespace myd.celeste.demo
 {
-    [RequireComponent(typeof(SpriteRenderer))]
     public class UnitSprite : MonoBehaviour
     {
         public MTexture Texture;
-        [HideInInspector]
-        public SpriteRenderer spriteRenderer = null;
         [HideInInspector]
         public Vector2 Position;
         public float Rate = 1f;
@@ -29,12 +26,13 @@ namespace myd.celeste.demo
         [HideInInspector]
         public string Path;
         private Dictionary<string, Animation> animations;
-        private Animation currentAnimation;
+        protected Animation currentAnimation;
         private float animationTimer;
         private int width;
         private int height;
-        [HideInInspector]
         public Vector2 Origin;
+
+        protected MSprite mSprite;
 
         public bool Animating { get; private set; }
 
@@ -68,6 +66,12 @@ namespace myd.celeste.demo
             }
         }
 
+        public void Awake()
+        {
+            MSprite mSpritePrefab = Resources.Load<MSprite>("MSprite");
+            mSprite = Instantiate(mSpritePrefab, this.transform, false);
+            mSprite.name = "MSprite";
+        }
 
         public void Init(Atlas atlas, string path)
         {
@@ -78,12 +82,20 @@ namespace myd.celeste.demo
             
         }
 
-        private void Awake()
-        {
-            spriteRenderer = this.GetComponent<SpriteRenderer>();
-        }
+        
 
         private void Update()
+        {
+            AnimUpdate();
+
+            RenderUpdate();
+        }
+
+        private void RenderUpdate()
+        {
+        }
+
+        private void AnimUpdate()
         {
             float deltatime = Time.deltaTime;
             if (!this.Animating)
@@ -131,7 +143,9 @@ namespace myd.celeste.demo
                 }
             }
             else
+            {
                 this.SetFrame(this.currentAnimation.Frames[this.CurrentAnimationFrame]);
+            }
         }
 
         private void SetFrame(MTexture texture)
@@ -139,7 +153,6 @@ namespace myd.celeste.demo
             if (texture == this.Texture)
                 return;
             this.Texture = texture;
-            this.spriteRenderer.sprite = texture.GetSprite();
             if (this.width == 0)
                 this.width = texture.Width;
             if (this.height == 0)
@@ -147,8 +160,14 @@ namespace myd.celeste.demo
             if (this.Justify.HasValue)
             {
                 this.Origin = new Vector2((float)this.Texture.Width * (float)this.Justify.Value.x, (float)this.Texture.Height * (float)this.Justify.Value.y);
-                this.transform.localPosition = new Vector2(this.Origin.x, this.Origin.y);
+                //this.mSprite.transform.localPosition = new Vector2(this.Origin.x, this.Origin.y) - this.Texture.DrawOffset; 
             }
+            else
+            {
+                //this.mSprite.transform.localPosition = new Vector2(this.Origin.x - this.Texture.Center.x-this.Texture.DrawOffset.x, this.Origin.y - this.Texture.Center.y - this.Texture.DrawOffset.x);
+            }
+            texture.LoadSprite(this.Origin);
+            this.mSprite.SetSprite(texture);
             if (this.OnFrameChange == null)
                 return;
             this.OnFrameChange(this.CurrentAnimationID);
@@ -357,7 +376,7 @@ namespace myd.celeste.demo
             return this;
         }
 
-        private class Animation
+        public class Animation
         {
             public float Delay;
             public MTexture[] Frames;

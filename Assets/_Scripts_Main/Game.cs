@@ -21,10 +21,11 @@ namespace myd.celeste.demo
         public void Awake()
         {
             instance = this;
+            Gfx.Game = Atlas.FromAtlas(Path.Combine("Graphics", "Atlases", "Gameplay"), Atlas.AtlasDataFormat.Packer);
         }
         private void Start()
         {
-            Gfx.Game = Atlas.FromAtlas(Path.Combine("Graphics", "Atlases", "Gameplay"), Atlas.AtlasDataFormat.Packer);
+            
             Gfx.SpriteBank = new SpriteBank(Gfx.Game, Path.Combine("Graphics", "Sprites.xml"));
             PlayerSprite.ClearFramesMetadata();
             PlayerSprite.CreateFramesMetadata("player");

@@ -28,6 +28,8 @@ public class MTexture
 
     public UnityEngine.Sprite USprite { get; private set; }
 
+    public Vector2Int Offset { get; private set; }              //实际像素偏移量
+
     public MTexture(Texture2D texture)
     {
         this.Texture = texture;
@@ -39,12 +41,23 @@ public class MTexture
         //this.USprite = UnityEngine.Sprite.Create(Texture, ClipRect, Vector3.zero);
     }
 
+    public void LoadSprite(Vector2 origin)
+    {
+        if (this.USprite == null)
+        {
+            Rect rect = new Rect(this.ClipRect.x, this.Texture.height - this.ClipRect.y - this.ClipRect.height, this.ClipRect.width, this.ClipRect.height);
+            Offset = new Vector2Int(Mathf.RoundToInt(DrawOffset.x - origin.x), Mathf.RoundToInt(origin.y - DrawOffset.y - this.ClipRect.height));
+            //Vector2 pivot = new Vector2((origin.x - DrawOffset.x + this.ClipRect.width / 2f) / (Width * 1.0f), 1-(origin.y - DrawOffset.y + this.ClipRect.height / 2f) / (Height * 1.0f));
+            this.USprite = UnityEngine.Sprite.Create(Texture, rect, Vector2.zero, 1f);
+        }
+    }
+
     public Sprite GetSprite()
     {
         if (this.USprite == null)
         {
-            Rect rect = new Rect(this.ClipRect.x, this.Texture.height - this.ClipRect.y - this.ClipRect.height - 1, this.ClipRect.width, this.ClipRect.height);
-            this.USprite = UnityEngine.Sprite.Create(Texture, rect, new Vector2(0.5f, 0.5f), 8f);
+            Rect rect = new Rect(this.ClipRect.x, this.Texture.height - this.ClipRect.y - this.ClipRect.height, this.ClipRect.width, this.ClipRect.height);
+            this.USprite = UnityEngine.Sprite.Create(Texture, rect, new Vector2(0.5f, 0.5f), 1f);
         }
         return this.USprite;
     }

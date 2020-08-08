@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &7777778219334152716
+--- !u!1 &9217896129630693210
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,53 +8,38 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 4591240823208989158}
-  - component: {fileID: 7205319973193126134}
+  - component: {fileID: 7772580180954601653}
+  - component: {fileID: 8764266898635356438}
   m_Layer: 0
-  m_Name: PlayerHair
+  m_Name: PlayerHairNode
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &4591240823208989158
+--- !u!4 &7772580180954601653
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7777778219334152716}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_GameObject: {fileID: 9217896129630693210}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &7205319973193126134
+--- !u!114 &8764266898635356438
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7777778219334152716}
+  m_GameObject: {fileID: 9217896129630693210}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: afa8b1f305704d54fb0a99c72485fcf4, type: 3}
+  m_Script: {fileID: 11500000, guid: bedca62e60db2714a9eae1fb61600612, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Color: {r: 172, g: 50, b: 50, a: 1}
-  Border: {r: 0, g: 0, b: 0, a: 1}
-  Alpha: 1
-  SimulateMotion: 1
-  StepPerSegment: {x: 0, y: -2}
-  StepInFacingPerSegment: 0.5
-  StepApproach: 64
-  StepYSinePerSegment: 0
-  Nodes: []
-  Hair: characters/player/hair00
-  Facing: 1
-  DrawPlayerSpriteOutline: 0
-  Sprite: {fileID: 0}
-  hairNodePrefab: {fileID: 8764266898635356438, guid: 99146993fa7b21045950b0532a1dfc56,
-    type: 3}

@@ -14,13 +14,13 @@ namespace myd.celeste.demo
     {
         public Atlas Atlas;
         public XmlDocument XML;
-        public Dictionary<string, SpriteData> SpriteData;
+        public Dictionary<string, SpriteData> SpriteDataDict;
 
         public SpriteBank(Atlas atlas, XmlDocument xml)
         {
             this.Atlas = atlas;
             this.XML = xml;
-            this.SpriteData = new Dictionary<string, SpriteData>((IEqualityComparer<string>)StringComparer.OrdinalIgnoreCase);
+            this.SpriteDataDict = new Dictionary<string, SpriteData>((IEqualityComparer<string>)StringComparer.OrdinalIgnoreCase);
             Dictionary<string, XmlElement> dictionary = new Dictionary<string, XmlElement>();
             foreach (object childNode in this.XML["Sprites"].ChildNodes)
             {
@@ -28,9 +28,9 @@ namespace myd.celeste.demo
                 {
                     XmlElement xml1 = childNode as XmlElement;
                     dictionary.Add(xml1.Name, xml1);
-                    if (this.SpriteData.ContainsKey(xml1.Name))
+                    if (this.SpriteDataDict.ContainsKey(xml1.Name))
                         throw new Exception("Duplicate sprite name in SpriteData: '" + xml1.Name + "'!");
-                    SpriteData spriteData = this.SpriteData[xml1.Name] = new SpriteData(this.Atlas);
+                    SpriteData spriteData = this.SpriteDataDict[xml1.Name] = new SpriteData(this.Atlas);
                     if (xml1.HasAttr("copy"))
                         spriteData.Add(dictionary[xml1.Attr("copy")], xml1.Attr("path"));
                     spriteData.Add(xml1, (string)null);
@@ -45,21 +45,28 @@ namespace myd.celeste.demo
 
         public bool Has(string id)
         {
-            return this.SpriteData.ContainsKey(id);
+            return this.SpriteDataDict.ContainsKey(id);
         }
 
-        public UnitSprite Create(string id)
-        {
-            if (this.SpriteData.ContainsKey(id))
-                return this.SpriteData[id].Create();
-            throw new Exception("Missing animation name in SpriteData: '" + id + "'!");
-        }
+        //public UnitSprite Create(string id)
+        //{
+        //    if (this.SpriteDataDict.ContainsKey(id))
+        //        return this.SpriteDataDict[id].Create();
+        //    throw new Exception("Missing animation name in SpriteData: '" + id + "'!");
+        //}
 
-        public UnitSprite CreateOn(UnitSprite sprite, string id)
+        //public UnitSprite CreateOn(UnitSprite sprite, string id)
+        //{
+        //    if (this.SpriteDataDict.ContainsKey(id))
+        //        return this.SpriteDataDict[id].CreateOn(sprite);
+        //    throw new Exception("Missing animation name in SpriteData: '" + id + "'!");
+        //}
+
+        public SpriteData GetSpriteData(string id)
         {
-            if (this.SpriteData.ContainsKey(id))
-                return this.SpriteData[id].CreateOn(sprite);
-            throw new Exception("Missing animation name in SpriteData: '" + id + "'!");
+            if (this.SpriteDataDict.ContainsKey(id))
+                return this.SpriteDataDict[id];
+            return null;
         }
     }
 }

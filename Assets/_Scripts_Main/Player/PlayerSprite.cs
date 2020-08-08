@@ -69,6 +69,10 @@ namespace myd.celeste.demo
 
         public PlayerSpriteMode Mode { get; private set; }
 
+        public void Start()
+        {
+            this.mSprite.SetSortingOrder(1);
+        }
         public void Load(PlayerSpriteMode mode)
           //: base((Atlas)null, (string)null)
         {
@@ -93,17 +97,23 @@ namespace myd.celeste.demo
                     break;
             }
             this.spriteName = id;
-            Gfx.SpriteBank.CreateOn((UnitSprite)this, id);
+
+            //初始化PlayerSprite
+            SpriteData spriteData = Gfx.SpriteBank.GetSpriteData(id);
+            this.Init(spriteData.Atlas, "");
+            spriteData.WrapUnitSprite(this);
+
+            //Gfx.SpriteBank.CreateOn((UnitSprite)this, id);
         }
 
-        //public Vector2 HairOffset
-        //{
-        //    get
-        //    {
-        //        PlayerAnimMetadata playerAnimMetadata;
-        //        return this.Texture != null && PlayerSprite.FrameMetadata.TryGetValue(this.Texture.AtlasPath, out playerAnimMetadata) ? playerAnimMetadata.HairOffset : Vector2.get_Zero();
-        //    }
-        //}
+        public Vector2 HairOffset
+        {
+            get
+            {
+                PlayerAnimMetadata playerAnimMetadata;
+                return this.Texture != null && PlayerSprite.FrameMetadata.TryGetValue(this.Texture.AtlasPath, out playerAnimMetadata) ? playerAnimMetadata.HairOffset : Vector2.zero;
+            }
+        }
 
         //public float CarryYOffset
         //{
@@ -160,7 +170,7 @@ namespace myd.celeste.demo
 
         public static void CreateFramesMetadata(string sprite)
         {
-            foreach (SpriteDataSource source in Gfx.SpriteBank.SpriteData[sprite].Sources)
+            foreach (SpriteDataSource source in Gfx.SpriteBank.SpriteDataDict[sprite].Sources)
             {
                 XmlElement xmlElement = source.XML["Metadata"];
                 string str1 = source.Path;

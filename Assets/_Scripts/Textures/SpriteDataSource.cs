@@ -12,5 +12,6 @@ namespace myd.celeste.demo
         public XmlElement XML;
         public string Path;
         public string OverridePath;
+        public string prefix;
     }
 }

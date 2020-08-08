@@ -68,7 +68,7 @@ namespace myd.celeste.ext
             Debug.Log("==加载关卡LevelLoad");
             LevelLoader loader = new LevelLoader(session, null);
 
-            StartCoroutine(DrawTiles(loader.Level.BgTiles.Tiles));
+            //StartCoroutine(DrawTiles(loader.Level.BgTiles.Tiles));
             StartCoroutine(DrawTiles(loader.solidTiles.Tiles));
         }
 
