@@ -43,4 +43,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 176f31ed05ebb8648950f8e7c8048d0c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  AllowPushing: 1
+  LiftSpeedGraceTime: 0.16
+  TreatNaive: 0
+  IgnoreJumpThrus: 0
+  mask:
+    serializedVersion: 2
+    m_Bits: 0
+  Speed: {x: 0, y: 0}
+  AutoJump: 0
+  AutoJumpTimer: 0
   Sprite: {fileID: 2745555944902533056, guid: 444d94d576f9b154fab224b30c46c0f8, type: 3}
+  playerHair: {fileID: 0}

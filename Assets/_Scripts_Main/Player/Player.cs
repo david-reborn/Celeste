@@ -7,8 +7,80 @@ using UnityEngine;
 
 namespace myd.celeste.demo
 {
-    public class Player : MonoBehaviour
+    public class Player : Actor
     {
+        public static LayerMask PLATFORM_MASK;
+
+        #region Constants
+        private const float DuckFriction = 500f;
+        private const float MaxRun = 90f;
+        private const float RunAccel = 1000f;
+        private const float RunReduce = 400f;
+        private const float AirMult = .65f;
+        private const float HoldingMaxRun = 70f;
+
+        private const float JumpGraceTime = 0.1f;
+        private const float JumpSpeed = 105f;           //TODO 反方向 -105f;          
+        private const float JumpHBoost = 40f;
+        private const float VarJumpTime = .2f;
+
+        private const float LiftYCap = -130f;
+        private const float LiftXCap = 250f;
+
+        public const float MaxFall = 160f;
+        private const float Gravity = 900f;
+        private const float HalfGravThreshold = 40f;
+        private const float FastMaxFall = 240f;
+        private const float FastMaxAccel = 300f;
+        public const int StNormal = 0;
+        public const int StClimb = 1;
+        public const int StDash = 2;
+        public const int StSwim = 3;
+        public const int StBoost = 4;
+        public const int StRedDash = 5;
+        public const int StHitSquash = 6;
+        public const int StLaunch = 7;
+        public const int StPickup = 8;
+        public const int StDreamDash = 9;
+        public const int StSummitLaunch = 10;
+        public const int StDummy = 11;
+        public const int StIntroWalk = 12;
+        public const int StIntroJump = 13;
+        public const int StIntroRespawn = 14;
+        public const int StIntroWakeUp = 15;
+        public const int StBirdDashTutorial = 16;
+        public const int StFrozen = 17;
+        public const int StReflectionFall = 18;
+        public const int StStarFly = 19;
+        public const int StTempleFall = 20;
+        public const int StCassetteFly = 21;
+        public const int StAttract = 22;
+        public const int StIntroMoonJump = 23;
+        public const int StFlingBird = 24;
+        public const int StIntroThinkForABit = 25;
+
+        #endregion
+
+        #region var
+        public Vector2 Speed;
+        private float maxFall;
+        private bool onGround;
+        private bool wasOnGround;
+        private int moveX;
+        private int forceMoveX;
+        private float forceMoveXTimer;
+
+        private float jumpGraceTimer;
+        public bool AutoJump;
+        public float AutoJumpTimer;
+        private float varJumpSpeed;
+        private float varJumpTimer;
+        private float dashAttackTimer;
+
+        #endregion
+
+        public readonly Rect normalHitbox = new Rect(0, 5.5f, 8, 11);
+
         public static readonly Color NormalHairColor = Util.HexToColor("AC3232");
 
         private static Chooser<string> idleColdOptions = new Chooser<string>().Add("idleA", 5f).Add("idleB", 3f).Add("idleC", 1f);
@@ -17,9 +89,25 @@ namespace myd.celeste.demo
         public IntroTypes IntroType { get; set; }           //出生方式
         [HideInInspector]
         public PlayerSprite Sprite;
-
         [HideInInspector]
         public PlayerHair playerHair;
+
+        private Level level = new Level();
+        private Collision onCollideH;
+        private Collision onCollideV;
+        public StateMachine StateMachine;
+
+        public void Awake()
+        {
+            mCollider = this.gameObject.AddComponent<BoxCollider2D>();
+            mCollider.offset = new Vector2(normalHitbox.x, normalHitbox.y);
+            mCollider.size = new Vector2(normalHitbox.width, normalHitbox.height);
+
+            onCollideH = OnCollideH;
+            onCollideV = OnCollideV;
+
+            PLATFORM_MASK = LayerMask.GetMask("Platform");
+        }
 
         public void Load(Vector2 position, PlayerSpriteMode spriteMode)
         {
@@ -32,15 +120,314 @@ namespace myd.celeste.demo
             this.playerHair = Instantiate(playerHairPrefab);
             this.playerHair.BindPlayerSprite(Sprite);
             this.playerHair.transform.SetParent(this.transform, false);
+
+            StateMachine = new StateMachine(23);
+            StateMachine.SetCallbacks(StNormal, NormalUpdate, null, NormalBegin, NormalEnd);
+
+            StateMachine.State = StNormal;
         }
 
-
-        private void Update()
+        public void Update()
         {
-            if (Input.GetKeyUp(KeyCode.Alpha1))
+            //更新OnGround状态
+            if (StateMachine.State == StDreamDash)
+                onGround = OnSafeGround = false;
+            else if (Speed.y <= 0)
             {
-                //string id = Player.idleColdOptions.Choose();
-                //this.Sprite.Play(id, false, false);
+                //Platform first = null;
+                Collider2D first = ColliderUtil.OverlapBox(this.mCollider, Vector2.down, 1, 0, PLATFORM_MASK);
+                //Platform first = CollideFirst<Solid>(this.transform.position + Vector2.UnitY);
+                //if (first == null)
+                //    first = CollideFirstOutside<JumpThru>(Position + Vector2.UnitY);
+
+                if (first != null)
+                {
+                    onGround = true;
+                    //OnSafeGround = first.Safe;
+                }
+                else
+                    onGround = OnSafeGround = false;
+            }
+            else
+                onGround = OnSafeGround = false;
+
+
+            //更新参数
+            if (onGround)
+            {
+                //dreamJump = false;
+                jumpGraceTimer = JumpGraceTime;
+            }
+            else if (jumpGraceTimer > 0)
+            {
+                jumpGraceTimer -= Time.deltaTime;
+            }
+
+
+            //处理输入
+            //Force Move X
+            if (forceMoveXTimer > 0)
+            {
+                forceMoveXTimer -= Time.deltaTime;
+                moveX = forceMoveX;
+            }
+            else
+            {
+                moveX = InputManager.MoveX.Value;
+                //climbHopSolid = null;
+            }
+
+            //更新状态
+            this.StateMachine.Update();
+
+            //处理位移
+            if (StateMachine.State != StDreamDash && StateMachine.State != StAttract)
+                MoveH(Speed.x * Time.deltaTime, onCollideH, (Solid)null);
+            if (StateMachine.State != StDreamDash && StateMachine.State != StAttract)
+                MoveV(Speed.y * Time.deltaTime, onCollideV, (Solid)null);
+        }
+
+        private int NormalUpdate()
+        {
+            if (Ducking && onGround)
+            {
+                Speed.x = Mathf.MoveTowards(Speed.x, 0, DuckFriction * Time.deltaTime);
+            }
+            else
+            {
+                float mult = onGround ? 1 : AirMult;
+                if (onGround && level.CoreMode == Session.CoreModes.Cold)
+                    mult *= .3f;
+
+                float max = Holding == null ? MaxRun : HoldingMaxRun;
+                //if (level.InSpace)
+                //    max *= SpacePhysicsMult;
+                if (Math.Abs(Speed.x) > max && Math.Sign(Speed.x) == moveX)
+                    Speed.x = Mathf.MoveTowards(Speed.x, max * moveX, RunReduce * mult * Time.deltaTime);  //Reduce back from beyond the max speed
+                else
+                    Speed.x = Mathf.MoveTowards(Speed.x, max * moveX, RunAccel * mult * Time.deltaTime);   //Approach the max speed
+            }
+            //Variable Jumping
+            if (varJumpTimer > 0)
+            {
+                if (AutoJump || InputManager.Jump.Check)
+                    Speed.y = Math.Min(Speed.y, varJumpSpeed);
+                else
+                    varJumpTimer = 0;
+            }
+
+            //Calculate current max fall speed
+            {
+                float mf = MaxFall;
+                float fmf = FastMaxFall;
+
+                //if (level.InSpace)
+                //{
+                //    mf *= SpacePhysicsMult;
+                //    fmf *= SpacePhysicsMult;
+                //}
+
+                //Fast Fall
+                if (InputManager.MoveY == 1 && Speed.y >= mf)
+                {
+                    maxFall = Mathf.MoveTowards(maxFall, fmf, FastMaxAccel * Time.deltaTime);
+
+                    float half = mf + (fmf - mf) * .5f;
+                    if (Speed.y >= half)
+                    {
+                        float spriteLerp = Math.Min(1f, (Speed.y - half) / (fmf - half));
+                        Sprite.Scale.y = Mathf.Lerp(1f, .5f, spriteLerp);
+                        Sprite.Scale.y = Mathf.Lerp(1f, 1.5f, spriteLerp);
+                    }
+                }
+                else
+                    maxFall = Mathf.MoveTowards(maxFall, mf, FastMaxAccel * Time.deltaTime);
+            }
+
+            if (!onGround)
+            {
+                float max = maxFall;
+
+                //Wall Slide
+                //if ((moveX == (int)Facing || (moveX == 0 && Input.Grab.Check)) && Input.MoveY.Value != 1)
+                //{
+                //    if (Speed.Y >= 0 && wallSlideTimer > 0 && Holding == null && ClimbBoundsCheck((int)Facing) && CollideCheck<Solid>(Position + Vector2.UnitX * (int)Facing) && CanUnDuck)
+                //    {
+                //        Ducking = false;
+                //        wallSlideDir = (int)Facing;
+                //    }
+
+                //    if (wallSlideDir != 0)
+                //    {
+                //        if (wallSlideTimer > WallSlideTime * .5f && ClimbBlocker.Check(level, this, Position + Vector2.UnitX * wallSlideDir))
+                //            wallSlideTimer = WallSlideTime * .5f;
+
+                //        max = MathHelper.Lerp(MaxFall, WallSlideStartMax, wallSlideTimer / WallSlideTime);
+                //        if (wallSlideTimer / WallSlideTime > .65f)
+                //            CreateWallSlideParticles(wallSlideDir);
+                //    }
+                //}
+
+                float mult = (Math.Abs(Speed.y) < HalfGravThreshold && (InputManager.Jump.Check || AutoJump)) ? .5f : 1f;
+
+                //if (level.InSpace)
+                //    mult *= SpacePhysicsMult;
+
+                Speed.y = Mathf.MoveTowards(Speed.y, max, Gravity * mult * Time.deltaTime);
+            }
+            //Variable Jumping
+            if (varJumpTimer > 0)
+            {
+                if (AutoJump || InputManager.Jump.Check)
+                    Speed.y = Math.Min(Speed.y, varJumpSpeed);
+                else
+                    varJumpTimer = 0;
+            }
+
+            //Jumping
+            if (InputManager.Jump.Pressed)
+            {
+               // Water water = null;
+                if (jumpGraceTimer > 0)
+                {
+                    Jump();
+                }
+                //else if (CanUnDuck)
+                //{
+                //    bool canUnduck = CanUnDuck;
+                //    if (canUnduck && WallJumpCheck(1))
+                //    {
+                //        if (Facing == Facings.Right && Input.Grab.Check && Stamina > 0 && Holding == null && !ClimbBlocker.Check(Scene, this, Position + Vector2.UnitX * WallJumpCheckDist))
+                //            ClimbJump();
+                //        else if (DashAttacking && DashDir.X == 0 && DashDir.Y == -1)
+                //            SuperWallJump(-1);
+                //        else
+                //            WallJump(-1);
+                //    }
+                //    else if (canUnduck && WallJumpCheck(-1))
+                //    {
+                //        if (Facing == Facings.Left && Input.Grab.Check && Stamina > 0 && Holding == null && !ClimbBlocker.Check(Scene, this, Position + Vector2.UnitX * -WallJumpCheckDist))
+                //            ClimbJump();
+                //        else if (DashAttacking && DashDir.X == 0 && DashDir.Y == -1)
+                //            SuperWallJump(1);
+                //        else
+                //            WallJump(1);
+                //    }
+                //    else if ((water = CollideFirst<Water>(Position + Vector2.UnitY * 2)) != null)
+                //    {
+                //        Jump();
+                //        water.TopSurface.DoRipple(Position, 1);
+                //    }
+                //}
+            }
+
+            return StNormal;
+        }
+
+        private void NormalBegin()
+        {
+            maxFall = MaxFall;
+        }
+
+        private void NormalEnd()
+        {
+            //wallBoostTimer = 0;
+            //wallSpeedRetentionTimer = 0;
+            //hopWaitX = 0;
+        }
+
+        #region Jumps 'n' Stuff
+        public bool OnSafeGround
+        {
+            get; private set;
+        }
+
+        public void Jump(bool particles = true, bool playSfx = true)
+        {
+            InputManager.Jump.ConsumeBuffer();
+            jumpGraceTimer = 0;
+            varJumpTimer = VarJumpTime;
+            AutoJump = false;
+            //dashAttackTimer = 0;
+            //wallSlideTimer = WallSlideTime;
+            ///wallBoostTimer = 0;
+
+            Speed.x += JumpHBoost * moveX;
+            Speed.y = JumpSpeed;
+            Speed += LiftBoost;
+            varJumpSpeed = Speed.y;
+
+            //LaunchedBoostCheck();
+
+            //if (playSfx)
+            //{
+            //    if (launched)
+            //        Play(Sfxs.char_mad_jump_assisted);
+
+            //    if (dreamJump)
+            //        Play(Sfxs.char_mad_jump_dreamblock);
+            //    else
+            //        Play(Sfxs.char_mad_jump);
+            //}
+
+            Sprite.Scale = new Vector2(.6f, 1.4f);
+            //if (particles)
+            //    Dust.Burst(BottomCenter, Calc.Up, 4);
+
+            SaveData.Instance.TotalJumps++;
+        }
+
+        private void OnCollideH(CollisionData data)
+        {
+
+        }
+
+        private void OnCollideV(CollisionData data)
+        {
+            Speed.y = 0;
+        }
+
+        private Vector2 LiftBoost
+        {
+            get
+            {
+                Vector2 val = LiftSpeed;
+
+                if (Math.Abs(val.x) > LiftXCap)
+                    val.x = LiftXCap * Math.Sign(val.y);
+
+                if (val.y > 0)
+                    val.y = 0;
+                else if (val.y < LiftYCap)
+                    val.y = LiftYCap;
+
+                return val;
+            }
+        }
+
+        #endregion
+
+        public Holdable Holding { get; set; }
+
+        public bool Ducking
+        {
+            get
+            {
+                //return this.Collider == this.duckHitbox || this.Collider == this.duckHurtbox;
+                return false;
+            }
+            set
+            {
+                //if (value)
+                //{
+                //    this.Collider = (Collider)this.duckHitbox;
+                //    this.hurtbox = this.duckHurtbox;
+                //}
+                //else
+                //{
+                //    this.Collider = (Collider)this.normalHitbox;
+                //    this.hurtbox = this.normalHurtbox;
+                //}
             }
         }
     }
