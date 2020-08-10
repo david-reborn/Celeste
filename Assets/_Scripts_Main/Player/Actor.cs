@@ -21,19 +21,11 @@ namespace myd.celeste.demo
         public bool MoveH(float moveH, Collision onCollide = null, Solid pusher = null)
         {
             this.movementCounter.x += moveH;
-            int num = (int)Math.Round((double)this.movementCounter.x, MidpointRounding.ToEven);
-            bool flag = num != 0;
-            bool result;
-            if (flag)
-            {
-                this.movementCounter.x -= (float)num;
-                result = this.MoveHExact(num, onCollide, pusher);
-            }
-            else
-            {
-                result = false;
-            }
-            return result;
+            int moveH1 = (int)Math.Round((double)this.movementCounter.x, MidpointRounding.ToEven);
+            if ((uint)moveH1 <= 0U)
+                return false;
+            this.movementCounter.x -= (float)moveH1;
+            return this.MoveHExact(moveH1, onCollide, pusher);
         }
 
         public bool MoveV(float moveV, Collision onCollide = null, Solid pusher = null)
@@ -50,32 +42,31 @@ namespace myd.celeste.demo
         {
             Vector2 position = this.transform.position;
             Vector2 targetPosition = position + Vector2.right * (float)moveH;
-            int num = Math.Sign(moveH);
+            int num1 = Math.Sign(moveH);
             int num2 = 0;
             while (moveH != 0)
             {
-                //Solid solid = base.CollideFirst<Solid>(this.Position + Vector2.UnitX * (float)num);
-                //bool flag = solid != null;
-                //if (flag)
-                //{
-                //    this.movementCounter.X = 0f;
-                //    bool flag2 = onCollide != null;
-                //    if (flag2)
-                //    {
-                //        onCollide(new CollisionData
-                //        {
-                //            Direction = Vector2.UnitX * (float)num,
-                //            Moved = Vector2.UnitX * (float)num2,
-                //            TargetPosition = targetPosition,
-                //            Hit = solid,
-                //            Pusher = pusher
-                //        });
-                //    }
-                //    return true;
-                //}
-                num2 += num;
-                moveH -= num;
-                this.transform.position += Vector3.right * (float)num;
+                Collider2D platform1 = ColliderUtil.OverlapBox(mCollider, Vector2.right, (float)num1, 0, Player.PLATFORM_MASK);
+                if (platform1!=null)
+                {
+                    this.movementCounter.x = 0f;
+                    bool flag2 = onCollide != null;
+                    if (flag2)
+                    {
+                        onCollide(new CollisionData
+                        {
+                            Direction = Vector2.right * (float)num1,
+                            Moved = Vector2.right * (float)num2,
+                            TargetPosition = targetPosition,
+                            //Hit = solid,
+                            //Pusher = pusher
+                        });
+                    }
+                    return true;
+                }
+                num2 += num1;
+                moveH -= num1;
+                this.transform.position += Vector3.right * (float)num1;
             }
             return false;
         }
@@ -88,7 +79,7 @@ namespace myd.celeste.demo
             int num2 = 0;
             while ((uint)moveV > 0U)
             {
-                Collider2D platform1 = ColliderUtil.OverlapBox(mCollider, Vector2.down, (float)num1-0.001f, 0, Player.PLATFORM_MASK);
+                Collider2D platform1 = ColliderUtil.OverlapBox(mCollider, Vector2.down, (float)num1, 0, Player.PLATFORM_MASK);
                 if (platform1 != null)
                 {
                     this.movementCounter.y = 0.0f;
@@ -142,6 +133,68 @@ namespace myd.celeste.demo
             get
             {
                 return this.currentLiftSpeed == Vector2.zero ? this.lastLiftSpeed : this.currentLiftSpeed;
+            }
+        }
+
+        public float Left
+        {
+            get
+            {
+                float result;
+                if (this.mCollider == null)
+                {
+                    result = this.transform.position.x;
+                }
+                else
+                {
+                    result = this.mCollider.bounds.min.x;
+                }
+                return result;
+            }
+            set
+            {
+                Vector3 temp = this.transform.position;
+                if (this.mCollider == null)
+                {
+                    temp.x = value;
+                    this.transform.position = temp;
+                }
+                else
+                {
+                    temp.x = value - this.mCollider.bounds.min.x;
+                    this.transform.position = temp;
+                }
+            }
+        }
+
+        public float Right
+        {
+            get
+            {
+                float result;
+                if (this.mCollider == null)
+                {
+                    result = this.transform.position.x;
+                }
+                else
+                {
+                    result = this.mCollider.bounds.max.x;
+                }
+                return result;
+            }
+            set
+            {
+                Vector3 temp = this.transform.position;
+                if (this.mCollider == null)
+                {
+                    temp.x = value;
+                    this.transform.position = temp;
+                }
+                else
+                {
+                    temp.x = value - this.mCollider.bounds.max.x;
+                    this.transform.position = temp;
+                }
             }
         }
     }

@@ -18,7 +18,7 @@ namespace myd.celeste
         public SolidTiles tilles;
 
         public TileGrid FgTilesLightMask;
-
+        public Rectangle Bounds = new Rectangle(0, 0, 1000, 1000);
         private Session.CoreModes coreMode;
 
         public Session.CoreModes CoreMode

@@ -9,6 +9,7 @@ namespace myd.celeste.demo
         public static VirtualIntegerAxis MoveX;
         public static VirtualIntegerAxis MoveY;
         public static VirtualButton Jump;
+        public static VirtualButton Grab;
         internal static List<VirtualInput> VirtualInputs = new List<VirtualInput>();
 
         private static InputManager instance;
@@ -35,9 +36,14 @@ namespace myd.celeste.demo
             Jump = new VirtualButton(0.08f);
             Jump.Nodes.Add((VirtualButton.Node)new VirtualButton.KeyboardKey(KeyCode.K));
 
+            Grab = new VirtualButton();
+            Grab.Nodes.Add((VirtualButton.Node)new VirtualButton.KeyboardKey(KeyCode.J));
+
+
             VirtualInputs.Add(MoveX);
             VirtualInputs.Add(MoveY);
             VirtualInputs.Add(Jump);
+            VirtualInputs.Add(Grab);
         }
 
         public void Update()

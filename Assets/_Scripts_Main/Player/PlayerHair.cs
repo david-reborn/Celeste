@@ -83,7 +83,9 @@ namespace myd.celeste.demo
             }
             for (int index = 0; index < this.Nodes.Count; ++index)
             {
+                Vector2 hairScale = this.GetHairScale(index);
                 this.hairs[index].transform.position = Nodes[index];
+                this.hairs[index].transform.localScale = hairScale;
             }
 
         }
@@ -120,9 +122,9 @@ namespace myd.celeste.demo
                     MTexture mtexture = index == 0 ? this.bangs[hairFrame] : Gfx.Game["characters/player/hair00"];
                     Vector2 hairScale = this.GetHairScale(index);
                     this.hairs[index].Draw(mtexture, new Vector2(-1f, 0.0f), origin, color1, hairScale);
-                    this.hairs[index].Draw(mtexture, new Vector2(1f, 0.0f), origin, color1, hairScale);
-                    this.hairs[index].Draw(mtexture, new Vector2(0f, -1f), origin, color1, hairScale);
-                    this.hairs[index].Draw(mtexture, new Vector2(0f, 1f), origin, color1, hairScale);
+                    this.hairs[index].Draw(mtexture, new Vector2( 1f, 0.0f), origin, color1, hairScale);
+                    this.hairs[index].Draw(mtexture, new Vector2( 0f, -1f), origin, color1, hairScale);
+                    this.hairs[index].Draw(mtexture, new Vector2( 0f,  1f), origin, color1, hairScale);
                 }
             }
             for (int index = this.Sprite.HairCount - 1; index >= 0; --index)

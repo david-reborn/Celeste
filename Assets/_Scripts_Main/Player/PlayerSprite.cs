@@ -217,5 +217,6 @@ namespace myd.celeste.demo
         {
             PlayerSprite.FrameMetadata.Clear();
         }
+
     }
 }
