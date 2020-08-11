@@ -357,7 +357,7 @@ namespace myd.celeste.demo
 
         }
 
-#region NormalState
+        #region NormalState
 
         private int NormalUpdate()
         {
@@ -552,8 +552,6 @@ namespace myd.celeste.demo
         #endregion
 
 
-
-
         #region Jumps 'n' Stuff
         public bool OnSafeGround
         {
@@ -626,11 +624,167 @@ namespace myd.celeste.demo
 
         #endregion
 
-        #region
+        #region Climb
         private int ClimbUpdate()
         {
+            climbNoMoveTimer -= Time.deltaTime;
+            if (onGround)
+                Stamina = ClimbMaxStamina;
+            //Wall Jump
+            //if (InputManager.Jump.Pressed && (!Ducking || CanUnDuck))
+            //{
+            //    if (moveX == -(int)Facing)
+            //        WallJump(-(int)Facing);
+            //    else
+            //        ClimbJump();
+
+            //    return StNormal;
+            //}
+            //Let go
+            if (!InputManager.Grab.Check)
+            {
+                Speed += LiftBoost;
+                //Play(Sfxs.char_mad_grab_letgo);
+                return StNormal;
+            }
+            if (climbNoMoveTimer <= 0&&false) //&& booster != null)
+            {
+                //Wallbooster
+                //wallBoosting = true;
+
+                //if (conveyorLoopSfx == null)
+                //    conveyorLoopSfx = Audio.Play(Sfxs.game_09_conveyor_activate, Position, "end", 0);
+                //Audio.Position(conveyorLoopSfx, Position);
+
+                //Speed.Y = Calc.Approach(Speed.Y, WallBoosterSpeed, WallBoosterAccel * Engine.DeltaTime);
+                //LiftSpeed = Vector2.UnitY * Math.Max(Speed.Y, WallBoosterLiftSpeed);
+                //Input.Rumble(RumbleStrength.Light, RumbleLength.Short);
+            }
+            else
+            {
+                //Climbing
+                float target = 0;
+                bool trySlip = false;
+                if (climbNoMoveTimer <= 0)
+                {
+                    //if (ClimbBlocker.Check(Scene, this, Position + Vector2.UnitX * (int)Facing))
+                    //    trySlip = true;
+                    //else 
+                    if (InputManager.MoveY.Value == -1)
+                    {
+                        target = ClimbUpSpeed;
+
+                        //Up Limit
+                        if (ColliderUtil.CollideCheck((Vector2)this.transform.position - Vector2.down, PLATFORM_MASK))// || (ClimbHopBlockedCheck() && SlipCheck(-1)))
+                        {
+                            if (Speed.y < 0)
+                                Speed.y = 0;
+                            target = 0;
+                            trySlip = true;
+                        }
+                        else if (SlipCheck())
+                        {
+                            //Hopping
+                            //ClimbHop();
+                            return StNormal;
+                        }
+                    }
+                    else if (InputManager.MoveY.Value == 1)
+                    {
+                        target = ClimbDownSpeed;
+
+                        if (onGround)
+                        {
+                            if (Speed.y > 0)
+                                Speed.y = 0;
+                            target = 0;
+                        }
+                        else
+                        {
+                            //CreateWallSlideParticles((int)Facing);
+                        }
+                    }
+                    else
+                    {
+                        trySlip = true;
+                    }
+                }
+                else
+                {
+                    trySlip = true;
+                }
+                lastClimbMove = Math.Sign(target);
+
+                //Slip down if hands above the ledge and no vertical input
+                if (trySlip && SlipCheck())
+                    target = ClimbSlipSpeed;
+
+                //Set Speed
+                Speed.y = Mathf.MoveTowards(Speed.y, target, ClimbAccel * Time.deltaTime);
+            }
+            
+            ////Down Limit
+            if (InputManager.MoveY.Value != 1 && Speed.y > 0 && !ColliderUtil.CollideCheck((Vector2)this.transform.position + new Vector2((int)Facing, 1), PLATFORM_MASK))
+                Speed.y = 0;
+
+            ////Stamina
+            if (climbNoMoveTimer <= 0)
+            {
+                if (lastClimbMove == -1)
+                {
+                    Stamina -= ClimbUpCost * Time.deltaTime;
+
+                    //if (Stamina <= ClimbTiredThreshold)
+                    //    sweatSprite.Play("danger");
+                    //else if (sweatSprite.CurrentAnimationID != "climbLoop")
+                    //    sweatSprite.Play("climb");
+                    //if (Scene.OnInterval(.2f))
+                    //    Input.Rumble(RumbleStrength.Climb, RumbleLength.Short);
+                }
+                else
+                {
+                    if (lastClimbMove == 0)
+                        Stamina -= ClimbStillCost * Time.deltaTime;
+
+                    if (!onGround)
+                    {
+                        //PlaySweatEffectDangerOverride("still");
+                        //if (Scene.OnInterval(.8f))
+                        //    Input.Rumble(RumbleStrength.Climb, RumbleLength.Short);
+                    }
+                    else
+                    {
+                        //PlaySweatEffectDangerOverride("idle");
+                    }
+                }
+            }
+            else
+            {
+                //PlaySweatEffectDangerOverride("idle");
+            }
+
+            ////Too tired           
+            //if (Stamina <= 0)
+            //{
+            //    Speed += LiftBoost;
+            //    return StNormal;
+            //}
             return StClimb;
         }
+
+        private bool SlipCheck(float addY = 0)
+        {
+            Vector2 at;
+            if (Facing == Facings.Right)
+                at = TopRight + Vector2.down * (4 + addY);
+            else
+                at = TopLeft - Vector2.right + Vector2.down * (4 + addY);
+
+            bool f1 = !ColliderUtil.CollideCheck(at, PLATFORM_MASK);
+            bool f2 = !ColliderUtil.CollideCheck(at + Vector2.down * (-4 + addY), PLATFORM_MASK);
+            return f1 && f2;
+        }
+
 
         private void ClimbBegin()
         {

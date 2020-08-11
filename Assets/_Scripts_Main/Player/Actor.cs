@@ -151,20 +151,6 @@ namespace myd.celeste.demo
                 }
                 return result;
             }
-            set
-            {
-                Vector3 temp = this.transform.position;
-                if (this.mCollider == null)
-                {
-                    temp.x = value;
-                    this.transform.position = temp;
-                }
-                else
-                {
-                    temp.x = value - this.mCollider.bounds.min.x;
-                    this.transform.position = temp;
-                }
-            }
         }
 
         public float Right
@@ -182,20 +168,31 @@ namespace myd.celeste.demo
                 }
                 return result;
             }
-            set
+        }
+
+        private float Top
+        {
+            get
             {
-                Vector3 temp = this.transform.position;
-                if (this.mCollider == null)
-                {
-                    temp.x = value;
-                    this.transform.position = temp;
-                }
-                else
-                {
-                    temp.x = value - this.mCollider.bounds.max.x;
-                    this.transform.position = temp;
-                }
+                return this.mCollider == null ? (float)this.transform.position.y : this.mCollider.bounds.max.y;
             }
         }
+        public Vector2 TopRight
+        {
+            get
+            {
+                return new Vector2(this.Right, this.Top);
+            }
+
+        }
+
+        public Vector2 TopLeft
+        {
+            get
+            {
+                return new Vector2(this.Left, this.Top);
+            }
+        }
+
     }
 }

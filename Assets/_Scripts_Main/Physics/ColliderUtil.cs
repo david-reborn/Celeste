@@ -24,5 +24,10 @@ namespace myd.celeste.demo
             Collider2D target = Physics2D.OverlapBox(point, source.size, angle, mask);
             return target;
         }
+
+        public static bool CollideCheck(Vector2 position, LayerMask mask)
+        {
+            return Physics2D.OverlapPoint(position, mask);
+        }
     }
 }
