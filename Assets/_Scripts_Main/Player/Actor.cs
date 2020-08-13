@@ -44,11 +44,12 @@ namespace myd.celeste.demo
             Vector2 targetPosition = position + Vector2.right * (float)moveH;
             int num1 = Math.Sign(moveH);
             int num2 = 0;
-            while (moveH != 0)
+            while ((uint)moveH > 0U)
             {
                 Collider2D platform1 = ColliderUtil.OverlapBox(mCollider, Vector2.right, (float)num1, 0, Player.PLATFORM_MASK);
                 if (platform1!=null)
                 {
+                    Debug.Log(mCollider.transform.position+"--"+ mCollider.size);
                     this.movementCounter.x = 0f;
                     bool flag2 = onCollide != null;
                     if (flag2)
@@ -92,27 +93,8 @@ namespace myd.celeste.demo
                             //Hit = platform1,
                             //Pusher = pusher
                         });
-                    Debug.Log("Touch the Platform");
                     return true;
                 }
-                //if (moveV > 0 && !this.IgnoreJumpThrus)
-                //{
-                //    Platform platform2 = (Platform)this.CollideFirstOutside<JumpThru>(this.Position + Vector2.UnitY * (float)num1);
-                //    if (platform2 != null)
-                //    {
-                //        this.movementCounter.Y = 0.0f;
-                //        if (onCollide != null)
-                //            onCollide(new CollisionData()
-                //            {
-                //                Direction = Vector2.UnitY * (float)num1,
-                //                Moved = Vector2.UnitY * (float)num2,
-                //                TargetPosition = vector2,
-                //                Hit = platform2,
-                //                Pusher = pusher
-                //            });
-                //        return true;
-                //    }
-                //}
                 num2 += num1;
                 moveV -= num1;
                 this.transform.position += Vector3.down * (float)num1;

@@ -15,13 +15,14 @@ namespace myd.celeste.demo
         public static Collider2D OverlapBox(BoxCollider2D source, Vector2 direct, float distance, float angle, LayerMask mask)
         {
             Vector2 point = (Vector2)source.gameObject.transform.position + source.offset + direct * distance;
-            Collider2D target = Physics2D.OverlapBox(point, source.size, angle, mask);
+            Collider2D target = Physics2D.OverlapBox(point, source.size-Vector2.one*0.05f, angle, mask);
             return target;
         }
 
         public static Collider2D OverlapBox(BoxCollider2D source, Vector2 point, float angle, LayerMask mask)
         {
-            Collider2D target = Physics2D.OverlapBox(point, source.size, angle, mask);
+            point += source.offset;
+            Collider2D target = Physics2D.OverlapBox(point, source.size - Vector2.one * 0.05f, angle, mask);
             return target;
         }
 

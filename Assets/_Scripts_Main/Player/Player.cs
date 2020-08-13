@@ -196,6 +196,14 @@ namespace myd.celeste.demo
             else
                 highestAirY = Math.Min(this.transform.position.y, highestAirY);
 
+
+            //After Dash
+            if (onGround && StateMachine.State != StClimb)
+            {
+                AutoJump = false;
+                Stamina = ClimbMaxStamina;
+                wallSlideTimer = WallSlideTime;
+            }
             //更新参数
             if (onGround)
             {
@@ -375,6 +383,7 @@ namespace myd.celeste.demo
                     {
                         if (ClimbCheck((int)Facing))
                         {
+                            Debug.Log("Enter StClimb");
                             Ducking = false;
                             return StClimb;
                         }
@@ -393,7 +402,6 @@ namespace myd.celeste.demo
                         //}
                     }
                 }
-
             }
             if (Ducking && onGround)
             {
@@ -547,7 +555,8 @@ namespace myd.celeste.demo
             //bool b2 = !ClimbBlocker.Check(Scene, this, position + Vector2.down * yAdd + Vector2.right * ClimbCheckDist * (int)Facing);
             bool b2 = true;
             bool b3 = ColliderUtil.OverlapBox(this.mCollider, position + new Vector2(dir * ClimbCheckDist, yAdd), 0, PLATFORM_MASK);
-            return b1 && b2 && b3;
+            bool result = b1 && b2 && b3;
+            return result;
         }
         #endregion
 
@@ -596,6 +605,7 @@ namespace myd.celeste.demo
 
         private void OnCollideH(CollisionData data)
         {
+            Debug.Log("OnCollideH:"+data);
             Speed.x = 0;
         }
 
@@ -673,7 +683,6 @@ namespace myd.celeste.demo
                     if (InputManager.MoveY.Value == -1)
                     {
                         target = ClimbUpSpeed;
-
                         //Up Limit
                         if (ColliderUtil.CollideCheck((Vector2)this.transform.position - Vector2.down, PLATFORM_MASK))// || (ClimbHopBlockedCheck() && SlipCheck(-1)))
                         {
