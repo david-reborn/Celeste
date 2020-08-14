@@ -112,6 +112,7 @@ namespace myd.celeste.demo
         private float dashAttackTimer;
         private float highestAirY;
         private float wallSlideTimer = WallSlideTime;
+        private int wallSlideDir;
         public float Stamina = ClimbMaxStamina;
         #endregion
 
@@ -196,6 +197,12 @@ namespace myd.celeste.demo
             else
                 highestAirY = Math.Min(this.transform.position.y, highestAirY);
 
+            //Wall Slide
+            if (wallSlideDir != 0)
+            {
+                wallSlideTimer = Math.Max(wallSlideTimer - Time.deltaTime, 0);
+                wallSlideDir = 0;
+            }
 
             //After Dash
             if (onGround && StateMachine.State != StClimb)
@@ -328,6 +335,11 @@ namespace myd.celeste.demo
                 {
                     Sprite.Play(PlayerSprite.Idle);
                 }
+            } 
+            // wall sliding
+            else if (wallSlideDir != 0 && Holding == null)
+            {
+                Sprite.Play(PlayerSprite.WallSlide);
             }
             else if (Speed.y < 0)
             {
@@ -456,24 +468,24 @@ namespace myd.celeste.demo
                 float max = maxFall;
 
                 //Wall Slide
-                //if ((moveX == (int)Facing || (moveX == 0 && Input.Grab.Check)) && Input.MoveY.Value != 1)
-                //{
-                //    if (Speed.Y >= 0 && wallSlideTimer > 0 && Holding == null && ClimbBoundsCheck((int)Facing) && CollideCheck<Solid>(Position + Vector2.UnitX * (int)Facing) && CanUnDuck)
-                //    {
-                //        Ducking = false;
-                //        wallSlideDir = (int)Facing;
-                //    }
+                if ((moveX == (int)Facing || (moveX == 0 && InputManager.Grab.Check)) && InputManager.MoveY.Value != 1)
+                {
+                    if (Speed.y >= 0 && wallSlideTimer > 0 && Holding == null && ClimbBoundsCheck((int)Facing) && ColliderUtil.CollideCheck((Vector2)this.transform.position + Vector2.right * (int)Facing, PLATFORM_MASK) && CanUnDuck)
+                    {
+                        Ducking = false;
+                        wallSlideDir = (int)Facing;
+                    }
 
-                //    if (wallSlideDir != 0)
-                //    {
-                //        if (wallSlideTimer > WallSlideTime * .5f && ClimbBlocker.Check(level, this, Position + Vector2.UnitX * wallSlideDir))
-                //            wallSlideTimer = WallSlideTime * .5f;
+                    if (wallSlideDir != 0)
+                    {
+                        //if (wallSlideTimer > WallSlideTime * .5f && ClimbBlocker.Check(level, this, Position + Vector2.UnitX * wallSlideDir))
+                        //    wallSlideTimer = WallSlideTime * .5f;
 
-                //        max = MathHelper.Lerp(MaxFall, WallSlideStartMax, wallSlideTimer / WallSlideTime);
-                //        if (wallSlideTimer / WallSlideTime > .65f)
-                //            CreateWallSlideParticles(wallSlideDir);
-                //    }
-                //}
+                        max = Mathf.Lerp(MaxFall, WallSlideStartMax, wallSlideTimer / WallSlideTime);
+                        //if (wallSlideTimer / WallSlideTime > .65f)
+                        //    CreateWallSlideParticles(wallSlideDir);
+                    }
+                }
 
                 float mult = (Math.Abs(Speed.y) < HalfGravThreshold && (InputManager.Jump.Check || AutoJump)) ? .5f : 1f;
 
@@ -682,6 +694,7 @@ namespace myd.celeste.demo
                     //else 
                     if (InputManager.MoveY.Value == -1)
                     {
+                        //Climb向上
                         target = ClimbUpSpeed;
                         //Up Limit
                         if (ColliderUtil.CollideCheck((Vector2)this.transform.position - Vector2.down, PLATFORM_MASK))// || (ClimbHopBlockedCheck() && SlipCheck(-1)))
@@ -834,6 +847,21 @@ namespace myd.celeste.demo
         #endregion
         public Holdable Holding { get; set; }
 
+        public bool CanUnDuck
+        {
+            get
+            {
+                return true;
+                //if (!Ducking)
+                //    return true;
+
+                //Collider was = Collider;
+                //Collider = normalHitbox;
+                //bool ret = !CollideCheck<Solid>();
+                //Collider = was;
+                //return ret;
+            }
+        }
         public bool Ducking
         {
             get
