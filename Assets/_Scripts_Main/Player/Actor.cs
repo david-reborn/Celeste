@@ -49,7 +49,7 @@ namespace myd.celeste.demo
                 Collider2D platform1 = ColliderUtil.OverlapBox(mCollider, Vector2.right, (float)num1, 0, Player.PLATFORM_MASK);
                 if (platform1!=null)
                 {
-                    Debug.Log(mCollider.transform.position+"--"+ mCollider.size);
+                    //Debug.Log(mCollider.transform.position+"--"+ mCollider.size);
                     this.movementCounter.x = 0f;
                     bool flag2 = onCollide != null;
                     if (flag2)

@@ -15,7 +15,7 @@ namespace myd.celeste.demo
         public static Collider2D OverlapBox(BoxCollider2D source, Vector2 direct, float distance, float angle, LayerMask mask)
         {
             Vector2 point = (Vector2)source.gameObject.transform.position + source.offset + direct * distance;
-            Collider2D target = Physics2D.OverlapBox(point, source.size-Vector2.one*0.05f, angle, mask);
+            Collider2D target = Physics2D.OverlapBox(point, source.size - Vector2.one * 0.05f, angle, mask);
             return target;
         }
 
@@ -26,9 +26,21 @@ namespace myd.celeste.demo
             return target;
         }
 
-        public static bool CollideCheck(Vector2 position, LayerMask mask)
+        public static bool CollidePoint(Vector2 position, LayerMask mask)
         {
             return Physics2D.OverlapPoint(position, mask);
+        }
+
+        public static bool CollideCheck(BoxCollider2D collider, Vector2 point, LayerMask mask)
+        {
+            point = point + collider.offset;
+            Collider2D target = Physics2D.OverlapBox(point, collider.size - Vector2.one * 0.05f, 0, mask);
+            return target != null;
+        }
+
+        public static Collider2D CollideFirst(BoxCollider2D source, Vector2 direct, float distance, float angle, LayerMask mask)
+        {
+            return OverlapBox(source, direct, distance, angle, mask);
         }
     }
 }

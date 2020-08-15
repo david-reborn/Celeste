@@ -142,15 +142,15 @@ namespace myd.celeste.demo
         //    }
         //}
 
-        //public bool Running
-        //{
-        //    get
-        //    {
-        //        if (this.LastAnimationID == null)
-        //            return false;
-        //        return this.LastAnimationID == "flip" || this.LastAnimationID.StartsWith("run");
-        //    }
-        //}
+        public bool Running
+        {
+            get
+            {
+                if (this.LastAnimationID == null)
+                    return false;
+                return this.LastAnimationID == "flip" || this.LastAnimationID.StartsWith("run");
+            }
+        }
 
         //public bool DreamDashing
         //{

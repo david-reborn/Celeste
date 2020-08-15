@@ -52,6 +52,10 @@ namespace myd.celeste.demo
         private const float ClimbJumpBoostTime = .2f;
         private const float ClimbHopNoWindTime = .3f;
 
+        private const int WallJumpCheckDist = 3;
+        private const float WallJumpForceTime = .16f;
+        private const float WallJumpHSpeed = MaxRun + JumpHBoost;
+
         private const float WallSlideStartMax = 20f;
         private const float WallSlideTime = 1.2f;
         
@@ -100,8 +104,6 @@ namespace myd.celeste.demo
         private bool onGround;
         private bool wasOnGround;
         private int moveX;
-        private int forceMoveX;
-        private float forceMoveXTimer;
 
         private float jumpGraceTimer;
         private bool AutoJump;
@@ -109,11 +111,18 @@ namespace myd.celeste.demo
         public float AutoJumpTimer;
         private float varJumpSpeed;
         private float varJumpTimer;
+        private int forceMoveX;
+        private float forceMoveXTimer;
+        private int hopWaitX;   // If you climb hop onto a moving solid, snap to beside it until you get above it
+        private float hopWaitXSpeed;
+        private Collider2D climbHopSolid;
+        private Vector2 climbHopSolidPosition;
         private float dashAttackTimer;
         private float highestAirY;
         private float wallSlideTimer = WallSlideTime;
         private int wallSlideDir;
         public float Stamina = ClimbMaxStamina;
+        private float playFootstepOnLand;
         #endregion
 
         public readonly Rect normalHitbox = new Rect(0, 5.5f, 8, 11);
@@ -168,6 +177,7 @@ namespace myd.celeste.demo
 
         public void Update()
         {
+            Sprite.Scale.x = Mathf.Abs(Sprite.Scale.x);
             //更新OnGround状态
             if (StateMachine.State == StDreamDash)
                 onGround = OnSafeGround = false;
@@ -191,6 +201,10 @@ namespace myd.celeste.demo
             {
                 onGround = OnSafeGround = false;
             }
+
+
+            playFootstepOnLand -= Time.deltaTime;
+
             //Highest Air Y
             if (onGround)
                 highestAirY = this.transform.position.y;
@@ -200,6 +214,7 @@ namespace myd.celeste.demo
             //Wall Slide
             if (wallSlideDir != 0)
             {
+                Debug.Log("wallSlideDir:"+ wallSlideDir);
                 wallSlideTimer = Math.Max(wallSlideTimer - Time.deltaTime, 0);
                 wallSlideDir = 0;
             }
@@ -238,6 +253,7 @@ namespace myd.celeste.demo
                 else
                     AutoJumpTimer = 0;
             }
+
             //处理输入
             //Force Move X
             if (forceMoveXTimer > 0)
@@ -248,7 +264,18 @@ namespace myd.celeste.demo
             else
             {
                 moveX = InputManager.MoveX.Value;
-                //climbHopSolid = null;
+                climbHopSolid = null;
+            }
+
+            //Climb Hop Solid Movement(到达墙顶时,一个小跳,恢复落地.会向Facing方向前进一小段)
+            if (climbHopSolid != null)//&& !climbHopSolid.Collidable)
+                climbHopSolid = null;
+            else if (climbHopSolid != null && ((Vector2)climbHopSolid.transform.position != climbHopSolidPosition))
+            {
+                var move = (Vector2)climbHopSolid.transform.position - climbHopSolidPosition;
+                climbHopSolidPosition = climbHopSolid.transform.position;
+                MoveHExact((int)move.x);
+                MoveVExact((int)move.y);
             }
 
             if (moveX != 0)
@@ -258,6 +285,23 @@ namespace myd.celeste.demo
                     Sprite.Scale = new Vector2(0.8f, 1.2f);
                 Facing = to;
             }
+
+            //Hop Wait X
+            if (hopWaitX != 0)
+            {
+                if (Math.Sign(Speed.x) == -hopWaitX || Speed.y > 0)
+                {
+                    Debug.Log(11);
+                    hopWaitX = 0;
+                }
+                else if (!ColliderUtil.CollideCheck(mCollider, (Vector2)this.transform.position + Vector2.right * hopWaitX, PLATFORM_MASK))
+                {
+                    Speed.x = hopWaitXSpeed;
+                    hopWaitX = 0;
+                    Debug.Log("hopWaitXSpeed:" + hopWaitXSpeed + "--Speed.x:" + Speed.x);
+                }
+            }
+
             //更新状态
             this.StateMachine.Update();
 
@@ -269,6 +313,15 @@ namespace myd.celeste.demo
 
             UpdateSprite();
             UpdateHair(true);
+
+            Render();
+        }
+
+        private void Render()
+        {
+            Sprite.Scale.x *= (int)Facing;
+            this.playerHair.Facing = Facing;
+            Sprite.transform.localScale = Sprite.Scale;
         }
 
         private void UpdateSprite()
@@ -276,69 +329,87 @@ namespace myd.celeste.demo
             Sprite.Scale.x = Mathf.MoveTowards(Sprite.Scale.x, 1f, 1.75f * Time.deltaTime);
             Sprite.Scale.y = Mathf.MoveTowards(Sprite.Scale.y, 1f, 1.75f * Time.deltaTime);
 
-            Sprite.transform.localScale = Sprite.Scale;
-            if (onGround)
+            if (StateMachine.State == StClimb)
             {
-                //fastJump = false;
-                //if (Holding == null && moveX != 0 && CollideCheck<Solid>(Position + Vector2.UnitX * moveX))
-                //{
-                //    Sprite.Play("push");
-                //}
-                //else if (Math.Abs(Speed.x) <= RunAccel / 40f && moveX == 0)
-                //{
-                //    //if (Holding != null)
-                //    //{
-                //    //    Sprite.Play(PlayerSprite.IdleCarry);
-                //    //}
-                //    //else if (!Scene.CollideCheck<Solid>(Position + new Vector2((int)Facing * 1, 2)) && !Scene.CollideCheck<Solid>(Position + new Vector2((int)Facing * 4, 2)) && !CollideCheck<JumpThru>(Position + new Vector2((int)Facing * 4, 2)))
-                //    //{
-                //    //    Sprite.Play(PlayerSprite.FrontEdge);
-                //    //}
-                //    //else if (!Scene.CollideCheck<Solid>(Position + new Vector2(-(int)Facing * 1, 2)) && !Scene.CollideCheck<Solid>(Position + new Vector2(-(int)Facing * 4, 2)) && !CollideCheck<JumpThru>(Position + new Vector2(-(int)Facing * 4, 2)))
-                //    //{
-                //    //    Sprite.Play("edgeBack");
-                //    //}
-                //    //else if (Input.MoveY.Value == -1)
-                //    //{
-                //    //    if (Sprite.LastAnimationID != PlayerSprite.LookUp)
-                //    //        Sprite.Play(PlayerSprite.LookUp);
-                //    //}
-                //    //else
-                //    {
-                //        if (Sprite.CurrentAnimationID != null && !Sprite.CurrentAnimationID.Contains("idle"))
-                //            Sprite.Play(PlayerSprite.Idle);
-                //    }
-                //}
-                //else if (Holding != null)
-                //{
-                //    Sprite.Play(PlayerSprite.RunCarry);
-                //}
-                //else if (Math.Sign(Speed.X) == -moveX && moveX != 0)
-                //{
-                //    if (Math.Abs(Speed.X) > MaxRun)
-                //        Sprite.Play(PlayerSprite.Skid);
-                //    else if (Sprite.CurrentAnimationID != PlayerSprite.Skid)
-                //        Sprite.Play(PlayerSprite.Flip);
-                //}
-                //else if (windDirection.X != 0 && windTimeout > 0f && (int)Facing == -Math.Sign(windDirection.X))
-                //{
-                //    Sprite.Play(PlayerSprite.RunWind);
-                //}
-                //else if (!Sprite.Running)
-                //{
-                //    if (Math.Abs(Speed.X) < MaxRun * .5f)
-                //        Sprite.Play(PlayerSprite.RunSlow);
-                //    else
-                //        Sprite.Play(PlayerSprite.RunFast);
-                //}
-                if (Sprite.CurrentAnimationID != null && !Sprite.CurrentAnimationID.Contains("idle"))
+                if (lastClimbMove < 0)
+                    Sprite.Play(PlayerSprite.ClimbUp);
+                else if (lastClimbMove > 0)
+                    Sprite.Play(PlayerSprite.WallSlide);
+                else if (InputManager.MoveX == -(int)Facing)
                 {
-                    Sprite.Play(PlayerSprite.Idle);
+                    if (Sprite.CurrentAnimationID != PlayerSprite.ClimbLookBack)
+                        Sprite.Play(PlayerSprite.ClimbLookBackStart);
+                }
+                else
+                    Sprite.Play(PlayerSprite.WallSlide);
+            }
+            else if (onGround)
+            {
+                fastJump = false;
+                if (Holding == null && moveX != 0 && ColliderUtil.CollideCheck(mCollider, (Vector2)this.transform.position + Vector2.right * moveX, PLATFORM_MASK))
+                {
+                    Sprite.Play("push");
+                }
+                else if (Math.Abs(Speed.x) <= RunAccel / 40f && moveX == 0)
+                {
+                    if (Holding != null)
+                    {
+                        Sprite.Play(PlayerSprite.IdleCarry);
+                    }
+                    //    //else if (!Scene.CollideCheck<Solid>(Position + new Vector2((int)Facing * 1, 2)) && !Scene.CollideCheck<Solid>(Position + new Vector2((int)Facing * 4, 2)) && !CollideCheck<JumpThru>(Position + new Vector2((int)Facing * 4, 2)))
+                    //    //{
+                    //    //    Sprite.Play(PlayerSprite.FrontEdge);
+                    //    //}
+                    //    //else if (!Scene.CollideCheck<Solid>(Position + new Vector2(-(int)Facing * 1, 2)) && !Scene.CollideCheck<Solid>(Position + new Vector2(-(int)Facing * 4, 2)) && !CollideCheck<JumpThru>(Position + new Vector2(-(int)Facing * 4, 2)))
+                    //    //{
+                    //    //    Sprite.Play("edgeBack");
+                    //    //}
+                    //    //else if (Input.MoveY.Value == -1)
+                    //    //{
+                    //    //    if (Sprite.LastAnimationID != PlayerSprite.LookUp)
+                    //    //        Sprite.Play(PlayerSprite.LookUp);
+                    //    //}
+                    //    //else
+                    //    {
+                    //        if (Sprite.CurrentAnimationID != null && !Sprite.CurrentAnimationID.Contains("idle"))
+                    //            Sprite.Play(PlayerSprite.Idle);
+                    //    }
+                    //else if (Holding != null)
+                    //{
+                    //    Sprite.Play(PlayerSprite.RunCarry);
+                    //}
+                    //else if (Math.Sign(Speed.X) == -moveX && moveX != 0)
+                    //{
+                    //    if (Math.Abs(Speed.X) > MaxRun)
+                    //        Sprite.Play(PlayerSprite.Skid);
+                    //    else if (Sprite.CurrentAnimationID != PlayerSprite.Skid)
+                    //        Sprite.Play(PlayerSprite.Flip);
+                    //}
+                    //else if (windDirection.X != 0 && windTimeout > 0f && (int)Facing == -Math.Sign(windDirection.X))
+                    //{
+                    //    Sprite.Play(PlayerSprite.RunWind);
+                    else
+                    {
+                        if (Sprite.CurrentAnimationID != null && !Sprite.CurrentAnimationID.Contains("idle"))
+                            Sprite.Play(PlayerSprite.Idle);
+                    }
+                }
+                else if (Holding != null)
+                {
+                    Sprite.Play(PlayerSprite.RunCarry);
+                }
+                else if (!Sprite.Running)
+                {
+                    if (Math.Abs(Speed.x) < MaxRun * .5f)
+                        Sprite.Play(PlayerSprite.RunSlow);
+                    else
+                        Sprite.Play(PlayerSprite.RunFast);
                 }
             } 
             // wall sliding
             else if (wallSlideDir != 0 && Holding == null)
             {
+                Debug.Log("Sprite.Play(PlayerSprite.WallSlide)");
                 Sprite.Play(PlayerSprite.WallSlide);
             }
             else if (Speed.y < 0)
@@ -374,7 +445,7 @@ namespace myd.celeste.demo
 
         private void UpdateHair(bool applyGravity)
         {
-
+            this.playerHair.OnUpdate();
         }
 
         #region NormalState
@@ -400,18 +471,18 @@ namespace myd.celeste.demo
                             return StClimb;
                         }
 
-                        //if (InputManager.MoveY < 1 && level.Wind.Y <= 0)
-                        //{
-                        //    for (int i = 1; i <= ClimbUpCheckDist; i++)
-                        //    {
-                        //        if (!CollideCheck<Solid>(Position + Vector2.UnitY * -i) && ClimbCheck((int)Facing, -i))
-                        //        {
-                        //            MoveVExact(-i);
-                        //            Ducking = false;
-                        //            return StClimb;
-                        //        }
-                        //    }
-                        //}
+                        if (InputManager.MoveY < 1 )//&& level.Wind.Y <= 0)
+                        {
+                            for (int i = 1; i <= ClimbUpCheckDist; i++)
+                            {
+                                if (ColliderUtil.CollideCheck(mCollider, (Vector2)this.transform.position + Vector2.down * -i, PLATFORM_MASK) && ClimbCheck((int)Facing, -i))
+                                {
+                                    MoveVExact(-i);
+                                    Ducking = false;
+                                    return StClimb;
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -456,7 +527,6 @@ namespace myd.celeste.demo
                         float spriteLerp = Math.Min(1f, (Speed.y - half) / (fmf - half));
                         Sprite.Scale.y = Mathf.Lerp(1f, .5f, spriteLerp);
                         Sprite.Scale.y = Mathf.Lerp(1f, 1.5f, spriteLerp);
-                        Sprite.transform.localScale = Sprite.Scale;
                     }
                 }
                 else
@@ -470,7 +540,7 @@ namespace myd.celeste.demo
                 //Wall Slide
                 if ((moveX == (int)Facing || (moveX == 0 && InputManager.Grab.Check)) && InputManager.MoveY.Value != 1)
                 {
-                    if (Speed.y >= 0 && wallSlideTimer > 0 && Holding == null && ClimbBoundsCheck((int)Facing) && ColliderUtil.CollideCheck((Vector2)this.transform.position + Vector2.right * (int)Facing, PLATFORM_MASK) && CanUnDuck)
+                    if (Speed.y >= 0 && wallSlideTimer > 0 && Holding == null && ClimbBoundsCheck((int)Facing) && ColliderUtil.CollideCheck(mCollider, (Vector2)this.transform.position + Vector2.right * (int)Facing, PLATFORM_MASK) && CanUnDuck)
                     {
                         Ducking = false;
                         wallSlideDir = (int)Facing;
@@ -546,13 +616,14 @@ namespace myd.celeste.demo
         private void NormalBegin()
         {
             maxFall = MaxFall;
+            Debug.Log("Enter[Normal]");
         }
 
         private void NormalEnd()
         {
             wallBoostTimer = 0;
             wallSpeedRetentionTimer = 0;
-            //hopWaitX = 0;
+            hopWaitX = 0;
         }
 
         public bool ClimbBoundsCheck(int dir)
@@ -586,7 +657,7 @@ namespace myd.celeste.demo
             varJumpTimer = VarJumpTime;
             AutoJump = false;
             //dashAttackTimer = 0;
-            //wallSlideTimer = WallSlideTime;
+            wallSlideTimer = WallSlideTime;
             ///wallBoostTimer = 0;
 
             Speed.x += JumpHBoost * moveX;
@@ -608,11 +679,89 @@ namespace myd.celeste.demo
             //}
 
             Sprite.Scale = new Vector2(.6f, 1.4f);
-            Sprite.transform.localScale = Sprite.Scale;
             //if (particles)
             //    Dust.Burst(BottomCenter, Calc.Up, 4);
 
             //SaveData.Instance.TotalJumps++;
+        }
+
+        private void WallJump(int dir)
+        {
+            Ducking = false;
+            InputManager.Jump.ConsumeBuffer();
+            jumpGraceTimer = 0;
+            varJumpTimer = VarJumpTime;
+            AutoJump = false;
+            dashAttackTimer = 0;
+            wallSlideTimer = WallSlideTime;
+            wallBoostTimer = 0;
+            if (moveX != 0)
+            {
+                forceMoveX = dir;
+                forceMoveXTimer = WallJumpForceTime;
+            }
+
+            //Get lift of wall jumped off of
+            if (LiftSpeed == Vector2.zero)
+            {
+                Collider2D wall = ColliderUtil.CollideFirst(this.mCollider, Vector2.right, WallJumpCheckDist, 0f, PLATFORM_MASK);
+                //if (wall != null)
+                    //LiftSpeed = wall.LiftSpeed;
+            }
+
+            Speed.x = WallJumpHSpeed * dir;
+            Speed.y = JumpSpeed;
+            Speed += LiftBoost;
+            varJumpSpeed = Speed.y;
+
+            //LaunchedBoostCheck();
+
+            // wall-sound?
+            //var pushOff = SurfaceIndex.GetPlatformByPriority(CollideAll<Platform>(Position - Vector2.UnitX * dir * 4, temp));
+            //if (pushOff != null)
+                //Play(Sfxs.char_mad_land, SurfaceIndex.Param, pushOff.GetWallSoundIndex(this, -dir));
+
+            // jump sfx
+            //Play(dir < 0 ? Sfxs.char_mad_jump_wall_right : Sfxs.char_mad_jump_wall_left);
+            Sprite.Scale = new Vector2(.6f, 1.4f);
+
+            //if (dir == -1)
+            //    Dust.Burst(Center + Vector2.UnitX * 2, Calc.UpLeft, 4);
+            //else
+            //    Dust.Burst(Center + Vector2.UnitX * -2, Calc.UpRight, 4);
+
+            SaveData.Instance.TotalWallJumps++;
+        }
+
+        private void ClimbJump()
+        {
+            if (!onGround)
+            {
+                Stamina -= ClimbJumpCost;
+
+                //sweatSprite.Play("jump", true);
+                //Input.Rumble(RumbleStrength.Light, RumbleLength.Medium);
+            }
+
+            //dreamJump = false;
+            Jump(false, false);
+
+            if (moveX == 0)
+            {
+                wallBoostDir = -(int)Facing;
+                wallBoostTimer = ClimbJumpBoostTime;
+            }
+
+            if (Facing == Facings.Right)
+            {
+                //Play(Sfxs.char_mad_jump_climb_right);
+                //Dust.Burst(Center + Vector2.UnitX * 2, Calc.UpLeft, 4);
+            }
+            else
+            {
+                //Play(Sfxs.char_mad_jump_climb_left);
+                //Dust.Burst(Center + Vector2.UnitX * -2, Calc.UpRight, 4);
+            }
         }
 
         private void OnCollideH(CollisionData data)
@@ -624,6 +773,32 @@ namespace myd.celeste.demo
         private void OnCollideV(CollisionData data)
         {
             Speed.y = 0;
+            if (StateMachine.State != StClimb)
+            {
+                float squish = Math.Min(Speed.y / FastMaxFall, 1);
+                Sprite.Scale.x = Mathf.Lerp(1, 1.6f, squish);
+                Sprite.Scale.y = Mathf.Lerp(1, .4f, squish);
+
+                //if (Speed.Y >= MaxFall / 2)
+                //    Dust.Burst(Position, Calc.Angle(new Vector2(0, -1)), 8);
+
+                //if (highestAirY < Y - 50 && Speed.Y >= MaxFall && Math.Abs(Speed.X) >= MaxRun)
+                //    Sprite.Play(PlayerSprite.RunStumble);
+
+                //Input.Rumble(RumbleStrength.Light, RumbleLength.Short);
+
+                //// landed SFX
+                //var platform = SurfaceIndex.GetPlatformByPriority(CollideAll<Platform>(Position + new Vector2(0, 1), temp));
+                //if (platform != null)
+                //{
+                //    var surface = platform.GetLandSoundIndex(this);
+                //    if (surface >= 0)
+                //        Play(playFootstepOnLand > 0f ? Sfxs.char_mad_footstep : Sfxs.char_mad_land, SurfaceIndex.Param, surface);
+                //    if (platform is DreamBlock)
+                //        (platform as DreamBlock).FootstepRipple(Position);
+                //}
+                playFootstepOnLand = 0f;
+            }
         }
 
         private Vector2 LiftBoost
@@ -653,15 +828,15 @@ namespace myd.celeste.demo
             if (onGround)
                 Stamina = ClimbMaxStamina;
             //Wall Jump
-            //if (InputManager.Jump.Pressed && (!Ducking || CanUnDuck))
-            //{
-            //    if (moveX == -(int)Facing)
-            //        WallJump(-(int)Facing);
-            //    else
-            //        ClimbJump();
+            if (InputManager.Jump.Pressed && (!Ducking || CanUnDuck))
+            {
+                if (moveX == -(int)Facing)
+                    WallJump(-(int)Facing);
+                else
+                    ClimbJump();
 
-            //    return StNormal;
-            //}
+                return StNormal;
+            }
             //Let go
             if (!InputManager.Grab.Check)
             {
@@ -697,7 +872,7 @@ namespace myd.celeste.demo
                         //Climb向上
                         target = ClimbUpSpeed;
                         //Up Limit
-                        if (ColliderUtil.CollideCheck((Vector2)this.transform.position - Vector2.down, PLATFORM_MASK))// || (ClimbHopBlockedCheck() && SlipCheck(-1)))
+                        if (ColliderUtil.CollideCheck(mCollider, (Vector2)this.transform.position - Vector2.down, PLATFORM_MASK))// || (ClimbHopBlockedCheck() && SlipCheck(-1)))
                         {
                             if (Speed.y < 0)
                                 Speed.y = 0;
@@ -707,7 +882,8 @@ namespace myd.celeste.demo
                         else if (SlipCheck())
                         {
                             //Hopping
-                            //ClimbHop();
+                            Debug.Log("ClimbHop:"+this.transform.position);
+                            ClimbHop();
                             return StNormal;
                         }
                     }
@@ -739,14 +915,16 @@ namespace myd.celeste.demo
 
                 //Slip down if hands above the ledge and no vertical input
                 if (trySlip && SlipCheck())
+                {
                     target = ClimbSlipSpeed;
+                }
 
                 //Set Speed
                 Speed.y = Mathf.MoveTowards(Speed.y, target, ClimbAccel * Time.deltaTime);
             }
             
             ////Down Limit
-            if (InputManager.MoveY.Value != 1 && Speed.y > 0 && !ColliderUtil.CollideCheck((Vector2)this.transform.position + new Vector2((int)Facing, 1), PLATFORM_MASK))
+            if (InputManager.MoveY.Value != 1 && Speed.y > 0 && !ColliderUtil.CollideCheck(mCollider, (Vector2)this.transform.position + new Vector2((int)Facing, 1), PLATFORM_MASK))
                 Speed.y = 0;
 
             ////Stamina
@@ -802,9 +980,34 @@ namespace myd.celeste.demo
             else
                 at = TopLeft - Vector2.right + Vector2.down * (4 + addY);
 
-            bool f1 = !ColliderUtil.CollideCheck(at, PLATFORM_MASK);
-            bool f2 = !ColliderUtil.CollideCheck(at + Vector2.down * (-4 + addY), PLATFORM_MASK);
+            bool f1 = !ColliderUtil.CollideCheck(mCollider, at, PLATFORM_MASK);
+            bool f2 = !ColliderUtil.CollideCheck(mCollider, at + Vector2.down * (-4 + addY), PLATFORM_MASK);
             return f1 && f2;
+        }
+
+        private void ClimbHop()
+        {
+            climbHopSolid = ColliderUtil.CollideFirst(mCollider, Vector2.right * (int)Facing, 1, 0, PLATFORM_MASK);
+            playFootstepOnLand = 0.5f;
+
+            if (climbHopSolid != null)
+            {
+                climbHopSolidPosition = climbHopSolid.transform.position;
+                hopWaitX = (int)Facing;
+                hopWaitXSpeed = (int)Facing * ClimbHopX;
+            }
+            else
+            {
+                hopWaitX = 0;
+                Speed.x = (int)Facing * ClimbHopX;
+            }
+
+            Speed.y = Math.Min(Speed.y, ClimbHopY);
+            forceMoveX = 0;
+            forceMoveXTimer = ClimbHopForceTime;
+            fastJump = false;
+            //noWindTimer = ClimbHopNoWindTime;
+            //Play(Sfxs.char_mad_climb_ledge);
         }
 
 
@@ -817,12 +1020,12 @@ namespace myd.celeste.demo
             climbNoMoveTimer = ClimbNoMoveTime;
             wallBoostTimer = 0;
             lastClimbMove = 0;
-
+            Debug.Log("Enter[Normal]");
             //Input.Rumble(RumbleStrength.Medium, RumbleLength.Short);
 
             //for (int i = 0; i < ClimbCheckDist; i++)
-            //    if (!CollideCheck<Solid>(Position + Vector2.UnitX * (int)Facing))
-            //        Position += Vector2.UnitX * (int)Facing;
+            //    if (!ColliderUtil.CollideCheck((Vector2)this.transform.position + Vector2.right * (int)Facing, PLATFORM_MASK))
+            //        this.transform.position = this.transform.position + Vector3.right * (int)Facing;
             //    else
             //        break;
 
@@ -903,5 +1106,10 @@ namespace myd.celeste.demo
             }
         }
 
+
+        //public void OnDrawGizmos()
+        //{
+        //    Gizmos.DrawLine();
+        //}
     }
 }
