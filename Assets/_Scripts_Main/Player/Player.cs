@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,7 +10,7 @@ namespace myd.celeste.demo
 {
     public class Player : Actor
     {
-        public static LayerMask PLATFORM_MASK;
+        
 
         #region Constants
         private const float DuckFriction = 500f;
@@ -33,6 +34,10 @@ namespace myd.celeste.demo
         private const float FastMaxFall = 240f;
         private const float FastMaxAccel = 300f;
 
+        private const float DodgeSlideSpeedMult = 1.2f;
+        private const float DuckSuperJumpXMult = 1.25f;
+        private const float DuckSuperJumpYMult = .5f;
+
         public const float ClimbMaxStamina = 110;
         private const float ClimbUpCost = 100 / 2.2f;
         private const float ClimbStillCost = 100 / 10f;
@@ -52,13 +57,36 @@ namespace myd.celeste.demo
         private const float ClimbJumpBoostTime = .2f;
         private const float ClimbHopNoWindTime = .3f;
 
+        private const float DashSpeed = 240f;
+        private const float EndDashSpeed = 160f;
+        private const float EndDashUpMult = .75f;
+        private const float DashTime = .15f;
+        private const float DashCooldown = .2f;
+        private const float DashRefillCooldown = .1f;
+        private const int DashHJumpThruNudge = 6;
+        private const int DashCornerCorrection = 4;
+        private const int DashVFloorSnapDist = 3;
+        private const float DashAttackTime = .3f;
+
         private const int WallJumpCheckDist = 3;
         private const float WallJumpForceTime = .16f;
         private const float WallJumpHSpeed = MaxRun + JumpHBoost;
 
         private const float WallSlideStartMax = 20f;
         private const float WallSlideTime = 1.2f;
-        
+
+        private const float BounceVarJumpTime = .2f;
+        private const float BounceSpeed = -140f;
+        private const float SuperBounceVarJumpTime = .2f;
+        private const float SuperBounceSpeed = -185f;
+
+        private const float SuperJumpSpeed = JumpSpeed;
+        private const float SuperJumpH = 260f;
+        private const float SuperWallJumpSpeed = -160f;
+        private const float SuperWallJumpVarTime = .25f;
+        private const float SuperWallJumpForceTime = .2f;
+        private const float SuperWallJumpH = MaxRun + JumpHBoost * 2;
+
 
         public const int StNormal = 0;
         public const int StClimb = 1;
@@ -104,7 +132,7 @@ namespace myd.celeste.demo
         private bool onGround;
         private bool wasOnGround;
         private int moveX;
-
+        public int Dashes;
         private float jumpGraceTimer;
         private bool AutoJump;
         private bool fastJump;
@@ -115,6 +143,7 @@ namespace myd.celeste.demo
         private float forceMoveXTimer;
         private int hopWaitX;   // If you climb hop onto a moving solid, snap to beside it until you get above it
         private float hopWaitXSpeed;
+        private Vector2 lastAim;
         private Collider2D climbHopSolid;
         private Vector2 climbHopSolidPosition;
         private float dashAttackTimer;
@@ -123,6 +152,23 @@ namespace myd.celeste.demo
         private int wallSlideDir;
         public float Stamina = ClimbMaxStamina;
         private float playFootstepOnLand;
+
+        private bool dashStartedOnGround;
+        private bool calledDashEvents;
+        private float dashCooldownTimer;
+        private float dashRefillCooldownTimer;
+        private bool launched;
+        private float launchedTimer;
+        private float dashTrailTimer;
+        private Vector2 beforeDashSpeed;
+        public Vector2 DashDir;
+        private int lastDashes;
+        public bool StartedDashing
+        {
+            get; private set;
+        }
+
+        public Vector2? OverrideDashDirection;
         #endregion
 
         public readonly Rect normalHitbox = new Rect(0, 5.5f, 8, 11);
@@ -142,6 +188,7 @@ namespace myd.celeste.demo
         private Collision onCollideH;
         private Collision onCollideV;
         public StateMachine StateMachine;
+
 
         public void Awake()
         {
@@ -170,9 +217,12 @@ namespace myd.celeste.demo
             StateMachine = new StateMachine(23);
             StateMachine.SetCallbacks(StNormal, NormalUpdate, null, NormalBegin, NormalEnd);
             StateMachine.SetCallbacks(StClimb, ClimbUpdate, null, ClimbBegin, ClimbEnd);
+            StateMachine.SetCallbacks(StDash, DashUpdate, DashCoroutine, DashBegin, DashEnd);
             StateMachine.State = StNormal;
 
             Facing = Facings.Right;
+            lastDashes = Dashes = MaxDashes;
+            lastAim = Vector2.right;
         }
 
         public void Update()
@@ -237,6 +287,22 @@ namespace myd.celeste.demo
                 jumpGraceTimer -= Time.deltaTime;
             }
 
+            {
+                if (dashCooldownTimer > 0)
+                    dashCooldownTimer -= Time.deltaTime;
+                if (dashRefillCooldownTimer > 0)
+                    dashRefillCooldownTimer -= Time.deltaTime;
+                else if (true) //(!Inventory.NoRefills)
+                {
+                    if (StateMachine.State == StSwim)
+                        RefillDash();
+                    else if (onGround)
+                        //if (CollideCheck<Solid, NegaBlock>(Position + Vector2.UnitY) || CollideCheckOutside<JumpThru>(Position + Vector2.UnitY))
+                        //    if (!CollideCheck<Spikes>(Position) || (SaveData.Instance.AssistMode && SaveData.Instance.Assists.Invincible))
+                                RefillDash();
+                }
+            }
+
             //Var Jump
             if (varJumpTimer > 0)
                 varJumpTimer -= Time.deltaTime;
@@ -285,6 +351,9 @@ namespace myd.celeste.demo
                     Sprite.Scale = new Vector2(0.8f, 1.2f);
                 Facing = to;
             }
+
+            //Aiming
+            lastAim = InputManager.GetAimVector(Facing);
 
             //Hop Wait X
             if (hopWaitX != 0)
@@ -452,6 +521,10 @@ namespace myd.celeste.demo
 
         private int NormalUpdate()
         {
+            //Use Lift Boost if walked off platform
+            if (LiftBoost.y < 0 && wasOnGround && !onGround && Speed.y >= 0)
+                Speed.y = LiftBoost.y;
+
             if (Holding == null)
             {
                 if (InputManager.Grab.Check && !IsTired && !Ducking)
@@ -484,6 +557,13 @@ namespace myd.celeste.demo
                             }
                         }
                     }
+                }
+
+                //Dashing
+                if (CanDash)
+                {
+                    Speed += LiftBoost;
+                    return StartDash();
                 }
             }
             if (Ducking && onGround)
@@ -764,6 +844,40 @@ namespace myd.celeste.demo
             }
         }
 
+        private void SuperWallJump(int dir)
+        {
+            Ducking = false;
+            InputManager.Jump.ConsumeBuffer();
+            jumpGraceTimer = 0;
+            varJumpTimer = SuperWallJumpVarTime;
+            AutoJump = false;
+            dashAttackTimer = 0;
+            wallSlideTimer = WallSlideTime;
+            wallBoostTimer = 0;
+
+            Speed.x = SuperWallJumpH * dir;
+            Speed.y = SuperWallJumpSpeed;
+            Speed += LiftBoost;
+            varJumpSpeed = Speed.y;
+            launched = true;
+
+            //Play(dir < 0 ? Sfxs.char_mad_jump_wall_right : Sfxs.char_mad_jump_wall_left);
+            //Play(Sfxs.char_mad_jump_superwall);
+            Sprite.Scale = new Vector2(.6f, 1.4f);
+
+            //if (dir == -1)
+            //    Dust.Burst(Center + Vector2.UnitX * 2, Calc.UpLeft, 4);
+            //else
+            //    Dust.Burst(Center + Vector2.UnitX * -2, Calc.UpRight, 4);
+
+            SaveData.Instance.TotalWallJumps++;
+        }
+
+        private bool WallJumpCheck(int dir)
+        {
+            return ClimbBoundsCheck(dir) && CollideCheck((Vector2)this.transform.position + Vector2.right * dir * WallJumpCheckDist);
+        }
+
         private void OnCollideH(CollisionData data)
         {
             Debug.Log("OnCollideH:"+data);
@@ -799,6 +913,45 @@ namespace myd.celeste.demo
                 //}
                 playFootstepOnLand = 0f;
             }
+        }
+
+        public int MaxDashes
+        {
+            get
+            {
+                //if (SaveData.Instance.AssistMode && SaveData.Instance.Assists.DashMode != Assists.DashModes.Normal && !level.InCutscene)
+                    return 2;
+                //else
+                //    return Inventory.Dashes;
+            }
+        }
+
+        public bool RefillDash()
+        {
+            if (Dashes < MaxDashes)
+            {
+                Dashes = MaxDashes;
+                return true;
+            }
+            else
+                return false;
+        }
+
+        public bool UseRefill()
+        {
+            if (Dashes < MaxDashes || Stamina < ClimbTiredThreshold)
+            {
+                Dashes = MaxDashes;
+                RefillStamina();
+                return true;
+            }
+            else
+                return false;
+        }
+
+        public void RefillStamina()
+        {
+            Stamina = ClimbMaxStamina;
         }
 
         private Vector2 LiftBoost
@@ -837,6 +990,15 @@ namespace myd.celeste.demo
 
                 return StNormal;
             }
+
+            //Dashing
+            if (CanDash)
+            {
+                Debug.Log("CanDash");
+                Speed += LiftBoost;
+                return StartDash();
+            }
+
             //Let go
             if (!InputManager.Grab.Check)
             {
@@ -1046,6 +1208,233 @@ namespace myd.celeste.demo
             wallSpeedRetentionTimer = 0;
             //if (sweatSprite != null && sweatSprite.CurrentAnimationID != "jump")
             //    sweatSprite.Play("idle");
+        }
+        #endregion
+
+        #region Dash State
+
+        private bool wasDashB;
+
+        public int StartDash()
+        {
+            wasDashB = Dashes == 2;
+            Dashes = Math.Max(0, Dashes - 1);
+            InputManager.Dash.ConsumeBuffer();
+            return StDash;
+        }
+
+        public bool CanDash
+        {
+            get
+            {
+                return InputManager.Dash.Pressed && dashCooldownTimer <= 0 && Dashes > 0; //&&(TalkComponent.PlayerOver == null || !Input.Talk.Pressed);
+            }
+        }
+
+        private void DashBegin()
+        {
+            Debug.Log("DashBegin");
+            calledDashEvents = false;
+            dashStartedOnGround = onGround;
+            launched = false;
+
+            if (Time.timeScale > 0.25f)
+            {
+                //冻帧
+                //Celeste.Freeze(.05f);
+            }
+            dashCooldownTimer = DashCooldown;
+            dashRefillCooldownTimer = DashRefillCooldown;
+            StartedDashing = true;
+            wallSlideTimer = WallSlideTime;
+            dashTrailTimer = 0;
+
+            //level.Displacement.AddBurst(Center, .4f, 8, 64, .5f, Ease.QuadOut, Ease.QuadOut);
+
+            //Input.Rumble(RumbleStrength.Strong, RumbleLength.Medium);
+
+            dashAttackTimer = DashAttackTime;
+            beforeDashSpeed = Speed;
+            Speed = Vector2.zero;
+            DashDir = Vector2.zero;
+
+            if (!onGround && Ducking && CanUnDuck)
+                Ducking = false;
+        }
+
+        private void CallDashEvents()
+        {
+        }
+
+        private void DashEnd()
+        {
+            Debug.Log("DashEnd");
+            CallDashEvents();
+        }
+
+        private int DashUpdate()
+        {
+            Debug.Log("DashUpdate");
+            StartedDashing = false;
+
+            //Trail
+            if (dashTrailTimer > 0)
+            {
+                dashTrailTimer -= Time.deltaTime;
+                if (dashTrailTimer <= 0)
+                {
+                    //CreateTrail();
+                }
+            }
+
+            //Grab Holdables
+            if (Holding == null && InputManager.Grab.Check && !IsTired && CanUnDuck)
+            {
+                //Grabbing Holdables
+                //foreach (Holdable hold in Scene.Tracker.GetComponents<Holdable>())
+                //    if (hold.Check(this) && Pickup(hold))
+                //        return StPickup;
+            }
+
+            if (DashDir.y == 0)
+            {
+                //JumpThru Correction
+                //foreach (JumpThru jt in Scene.Tracker.GetEntities<JumpThru>())
+                //    if (CollideCheck(jt) && Bottom - jt.Top <= DashHJumpThruNudge)
+                //        MoveVExact((int)(jt.Top - Bottom));
+
+                //Super Jump
+                //if (CanUnDuck && InputManager.Jump.Pressed && jumpGraceTimer > 0)
+                //{
+                //    SuperJump();
+                //    return StNormal;
+                //}
+            }
+
+            if (DashDir.x == 0 && DashDir.y == -1)
+            {
+                if (InputManager.Jump.Pressed && CanUnDuck)
+                {
+                    if (WallJumpCheck(1))
+                    {
+                        SuperWallJump(-1);
+                        return StNormal;
+                    }
+                    else if (WallJumpCheck(-1))
+                    {
+                        SuperWallJump(1);
+                        return StNormal;
+                    }
+                }
+            }
+            else
+            {
+                if (InputManager.Jump.Pressed && CanUnDuck)
+                {
+                    if (WallJumpCheck(1))
+                    {
+                        WallJump(-1);
+                        return StNormal;
+                    }
+                    else if (WallJumpCheck(-1))
+                    {
+                        WallJump(1);
+                        return StNormal;
+                    }
+                }
+            }
+
+            //if (Speed != Vector2.zero && level.OnInterval(0.02f))
+            //    level.ParticlesFG.Emit(wasDashB ? P_DashB : P_DashA, Center + Calc.Random.Range(Vector2.One * -2, Vector2.One * 2), DashDir.Angle());
+            return StDash;
+        }
+
+        private IEnumerator DashCoroutine()
+        {
+            yield return null;
+
+            var dir = lastAim;
+            if (OverrideDashDirection.HasValue)
+                dir = OverrideDashDirection.Value;
+
+            var newSpeed = dir * DashSpeed;
+            if (Math.Sign(beforeDashSpeed.x) == Math.Sign(newSpeed.x) && Math.Abs(beforeDashSpeed.x) > Math.Abs(newSpeed.y))
+                newSpeed.x = beforeDashSpeed.x;
+            Speed = newSpeed;
+
+            //if (CollideCheck<Water>())
+            //    Speed *= SwimDashSpeedMult;
+
+            DashDir = dir;
+            //TODO 震屏
+            //SceneAs<Level>().DirectionalShake(DashDir, .2f);
+
+            if (DashDir.x != 0)
+                Facing = (Facings)Math.Sign(DashDir.x);
+
+            CallDashEvents();
+
+            //Feather particles
+            //if (StateMachine.PreviousState == StStarFly)
+            //    level.Particles.Emit(FlyFeather.P_Boost, 12, Center, Vector2.One * 4, (-dir).Angle());
+
+            //Dash Slide
+            if (onGround && DashDir.x != 0 && DashDir.y > 0 && Speed.y > 0)//&&!Inventory.DreamDash || !CollideCheck<DreamBlock>(Position + Vector2.UnitY)))
+            {
+                DashDir.x = Math.Sign(DashDir.x);
+                DashDir.y = 0;
+                Speed.y = 0;
+                Speed.x *= DodgeSlideSpeedMult;
+                Ducking = true;
+            }
+
+            //SlashFx.Burst(Center, DashDir.Angle());
+            //CreateTrail();
+            dashTrailTimer = .08f;
+
+            //Swap Block check
+            //if (DashDir.x != 0 && InputManager.Grab.Check)
+            //{
+            //    var swapBlock = CollideFirst<SwapBlock>(Position + Vector2.UnitX * Math.Sign(DashDir.X));
+            //    if (swapBlock != null && swapBlock.Direction.X == Math.Sign(DashDir.X))
+            //    {
+            //        StateMachine.State = StClimb;
+            //        Speed = Vector2.zero;
+            //        yield break;
+            //    }
+            //}
+
+            //Stick to Swap Blocks
+            Vector2 swapCancel = Vector2.one;
+            //foreach (SwapBlock swapBlock in Scene.Tracker.GetEntities<SwapBlock>())
+            //{
+            //    if (CollideCheck(swapBlock, Position + Vector2.UnitY))
+            //    {
+            //        if (swapBlock != null && swapBlock.Swapping)
+            //        {
+            //            if (DashDir.X != 0 && swapBlock.Direction.X == Math.Sign(DashDir.X))
+            //                Speed.X = swapCancel.X = 0;
+            //            if (DashDir.Y != 0 && swapBlock.Direction.Y == Math.Sign(DashDir.Y))
+            //                Speed.Y = swapCancel.Y = 0;
+            //        }
+            //    }
+            //}
+
+            yield return DashTime;
+
+            //CreateTrail();
+
+            AutoJump = true;
+            AutoJumpTimer = 0;
+            if (DashDir.y <= 0)
+            {
+                Speed = DashDir * EndDashSpeed;
+                Speed.x *= swapCancel.x;
+                Speed.y *= swapCancel.y;
+            }
+            if (Speed.y < 0)
+                Speed.y *= EndDashUpMult;
+            StateMachine.State = StNormal;
         }
         #endregion
         public Holdable Holding { get; set; }

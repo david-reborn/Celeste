@@ -6,6 +6,8 @@ namespace myd.celeste.demo
 {
     public class Actor : MonoBehaviour
     {
+        public static LayerMask PLATFORM_MASK;
+
         public bool AllowPushing = true;
         public float LiftSpeedGraceTime = 0.16f;
         //public Collision SquishCallback;
@@ -176,5 +178,9 @@ namespace myd.celeste.demo
             }
         }
 
+        protected bool CollideCheck(Vector2 poisition)
+        {
+            return ColliderUtil.CollideCheck(mCollider, poisition, PLATFORM_MASK);
+        }
     }
 }
