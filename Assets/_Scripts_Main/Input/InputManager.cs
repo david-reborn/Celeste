@@ -25,6 +25,7 @@ namespace myd.celeste.demo
 
         public void Start()
         {
+            Debug.Log("InputManager Start");
             MoveX = new VirtualIntegerAxis(new VirtualAxis.Node[2]{
                 (VirtualAxis.Node) new VirtualAxis.KeyboardKeys(VirtualInput.OverlapBehaviors.TakeNewer, KeyCode.LeftArrow, KeyCode.RightArrow),
                 (VirtualAxis.Node) new VirtualAxis.KeyboardKeys(VirtualInput.OverlapBehaviors.TakeNewer, KeyCode.A, KeyCode.D)
@@ -42,7 +43,7 @@ namespace myd.celeste.demo
             Grab = new VirtualButton();
             Grab.Nodes.Add((VirtualButton.Node)new VirtualButton.KeyboardKey(KeyCode.J));
 
-            Dash = new VirtualButton();
+            Dash = new VirtualButton(0.08f);
             Dash.Nodes.Add((VirtualButton.Node)new VirtualButton.KeyboardKey(KeyCode.L));
 
             Aim = new VirtualJoystick(false, new VirtualJoystick.Node[1]
@@ -69,7 +70,6 @@ namespace myd.celeste.demo
         public static Vector2 GetAimVector(Facings defaultFacing = Facings.Right)
         {
             Vector2 vector2 = Aim.Value;
-            Debug.Log(vector2);
             if (vector2 == Vector2.zero)
             {
                 //if (SaveData.Instance != null && SaveData.Instance.Assists.DashAssist)

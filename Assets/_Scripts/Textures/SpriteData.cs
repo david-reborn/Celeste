@@ -91,10 +91,6 @@ namespace myd.celeste.demo
                 {
                     Chooser<string> into = !xml1.HasAttr("goto") ? (Chooser<string>)null : Chooser<string>.FromString<string>(xml1.Attr("goto"));
                     string id = xml1.Attr("id");
-                    if (id.Equals("idleA"))
-                    {
-                        Debug.Log(111);
-                    }
                     string str2 = xml1.Attr("path", "");
                     int[] frames = Util.ReadCSVIntWithTricks(xml1.Attr("frames", ""));
                     string path = string.IsNullOrEmpty(spriteDataSource.OverridePath) || !this.HasFrames(this.Atlas, spriteDataSource.OverridePath + str2, frames) ? str1 + str2 : spriteDataSource.OverridePath + str2;

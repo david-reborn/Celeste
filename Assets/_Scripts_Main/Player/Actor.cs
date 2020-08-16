@@ -182,5 +182,10 @@ namespace myd.celeste.demo
         {
             return ColliderUtil.CollideCheck(mCollider, poisition, PLATFORM_MASK);
         }
+
+        protected bool CollideCheck()
+        {
+            return ColliderUtil.CollideCheck(mCollider, this.transform.position, PLATFORM_MASK);
+        }
     }
 }

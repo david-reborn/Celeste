@@ -10,8 +10,10 @@ namespace myd.celeste.demo
 {
     public class Player : Actor
     {
-        
-
+        public BoxCollider2D normalHitbox;
+        public BoxCollider2D duckHitbox;
+        public BoxCollider2D normalHurtbox;// = new Hitbox(8, 9, -4, -11);
+        public BoxCollider2D duckHurtbox;// = new Hitbox(8, 4, -4, -6);
         #region Constants
         private const float DuckFriction = 500f;
         private const float MaxRun = 90f;
@@ -24,7 +26,7 @@ namespace myd.celeste.demo
         private const float JumpSpeed = -105f;           //TODO 反方向 -105f;          
         private const float JumpHBoost = 40f;
         private const float VarJumpTime = .2f;
-
+        private const float WallSpeedRetentionTime = .06f;
         private const float LiftYCap = -130f;
         private const float LiftXCap = 250f;
 
@@ -128,6 +130,7 @@ namespace myd.celeste.demo
         private float climbNoMoveTimer;
         private int lastClimbMove;
 
+        private BoxCollider2D hurtbox;
         private float maxFall;
         private bool onGround;
         private bool wasOnGround;
@@ -171,7 +174,8 @@ namespace myd.celeste.demo
         public Vector2? OverrideDashDirection;
         #endregion
 
-        public readonly Rect normalHitbox = new Rect(0, 5.5f, 8, 11);
+        //private readonly Rect normalHitbox = new Rect(0, 5.5f, 8, 11);
+        //private readonly Rect duckHitbox = new Rect(0, 3, 8, 6);
 
         public static readonly Color NormalHairColor = Util.HexToColor("AC3232");
 
@@ -192,14 +196,17 @@ namespace myd.celeste.demo
 
         public void Awake()
         {
-            mCollider = this.gameObject.AddComponent<BoxCollider2D>();
-            mCollider.offset = new Vector2(normalHitbox.x, normalHitbox.y);
-            mCollider.size = new Vector2(normalHitbox.width, normalHitbox.height);
+            mCollider = normalHitbox;
 
             onCollideH = OnCollideH;
             onCollideV = OnCollideV;
 
             PLATFORM_MASK = LayerMask.GetMask("Platform");
+        }
+
+        private void Start()
+        {
+            Debug.Log("Player Start");
         }
 
         public void Load(Vector2 position, PlayerSpriteMode spriteMode)
@@ -354,6 +361,20 @@ namespace myd.celeste.demo
 
             //Aiming
             lastAim = InputManager.GetAimVector(Facing);
+
+            //Wall Speed Retention
+            if (wallSpeedRetentionTimer > 0)
+            {
+                if (Math.Sign(Speed.x) == -Math.Sign(wallSpeedRetained))
+                    wallSpeedRetentionTimer = 0;
+                else if (CollideCheck((Vector2)this.transform.position + Vector2.right * Math.Sign(wallSpeedRetained)))
+                {
+                    Speed.x = wallSpeedRetained;
+                    wallSpeedRetentionTimer = 0;
+                }
+                else
+                    wallSpeedRetentionTimer -= Time.deltaTime;
+            }
 
             //Hop Wait X
             if (hopWaitX != 0)
@@ -656,38 +677,42 @@ namespace myd.celeste.demo
             //Jumping
             if (InputManager.Jump.Pressed)
             {
-               // Water water = null;
+                // Water water = null;
                 if (jumpGraceTimer > 0)
                 {
                     Jump();
                 }
-                //else if (CanUnDuck)
-                //{
-                //    bool canUnduck = CanUnDuck;
-                //    if (canUnduck && WallJumpCheck(1))
-                //    {
-                //        if (Facing == Facings.Right && Input.Grab.Check && Stamina > 0 && Holding == null && !ClimbBlocker.Check(Scene, this, Position + Vector2.UnitX * WallJumpCheckDist))
-                //            ClimbJump();
-                //        else if (DashAttacking && DashDir.X == 0 && DashDir.Y == -1)
-                //            SuperWallJump(-1);
-                //        else
-                //            WallJump(-1);
-                //    }
-                //    else if (canUnduck && WallJumpCheck(-1))
-                //    {
-                //        if (Facing == Facings.Left && Input.Grab.Check && Stamina > 0 && Holding == null && !ClimbBlocker.Check(Scene, this, Position + Vector2.UnitX * -WallJumpCheckDist))
-                //            ClimbJump();
-                //        else if (DashAttacking && DashDir.X == 0 && DashDir.Y == -1)
-                //            SuperWallJump(1);
-                //        else
-                //            WallJump(1);
-                //    }
-                //    else if ((water = CollideFirst<Water>(Position + Vector2.UnitY * 2)) != null)
-                //    {
-                //        Jump();
-                //        water.TopSurface.DoRipple(Position, 1);
-                //    }
-                //}
+                else if (CanUnDuck)
+                {
+                    Debug.Log("11");
+                    bool canUnduck = CanUnDuck;
+                    if (canUnduck && WallJumpCheck(1))
+                    {
+                        if (Facing == Facings.Right && InputManager.Grab.Check && Stamina > 0 && Holding == null)//&& !ClimbBlocker.Check(Scene, this, Position + Vector2.UnitX * WallJumpCheckDist))
+                            ClimbJump();
+                        else if (DashAttacking && DashDir.x == 0 && DashDir.y == -1)
+                            SuperWallJump(-1);
+                        else
+                        {
+                            Debug.Log("22");
+                            WallJump(-1);
+                        }
+                    }
+                    else if (canUnduck && WallJumpCheck(-1))
+                    {
+                        if (Facing == Facings.Left && InputManager.Grab.Check && Stamina > 0 && Holding == null) //&& !ClimbBlocker.Check(Scene, this, Position + Vector2.UnitX * -WallJumpCheckDist))
+                            ClimbJump();
+                        else if (DashAttacking && DashDir.x == 0 && DashDir.y == -1)
+                            SuperWallJump(1);
+                        else
+                            WallJump(1);
+                    }
+                    //else if ((water = CollideFirst<Water>(Position + Vector2.UnitY * 2)) != null)
+                    //{
+                    //    Jump();
+                    //    water.TopSurface.DoRipple(Position, 1);
+                    //}
+                }
             }
 
             return StNormal;
@@ -736,9 +761,9 @@ namespace myd.celeste.demo
             jumpGraceTimer = 0;
             varJumpTimer = VarJumpTime;
             AutoJump = false;
-            //dashAttackTimer = 0;
+            dashAttackTimer = 0;
             wallSlideTimer = WallSlideTime;
-            ///wallBoostTimer = 0;
+            wallBoostTimer = 0;
 
             Speed.x += JumpHBoost * moveX;
             Speed.y = JumpSpeed;
@@ -785,8 +810,8 @@ namespace myd.celeste.demo
             if (LiftSpeed == Vector2.zero)
             {
                 Collider2D wall = ColliderUtil.CollideFirst(this.mCollider, Vector2.right, WallJumpCheckDist, 0f, PLATFORM_MASK);
-                //if (wall != null)
-                    //LiftSpeed = wall.LiftSpeed;
+                if (wall != null)
+                    LiftSpeed = Vector2.zero;//wall.LiftSpeed;
             }
 
             Speed.x = WallJumpHSpeed * dir;
@@ -810,7 +835,7 @@ namespace myd.celeste.demo
             //else
             //    Dust.Burst(Center + Vector2.UnitX * -2, Calc.UpRight, 4);
 
-            SaveData.Instance.TotalWallJumps++;
+            //SaveData.Instance.TotalWallJumps++;
         }
 
         private void ClimbJump()
@@ -880,8 +905,14 @@ namespace myd.celeste.demo
 
         private void OnCollideH(CollisionData data)
         {
-            Debug.Log("OnCollideH:"+data);
             Speed.x = 0;
+
+            //Speed retention
+            if (wallSpeedRetentionTimer <= 0)
+            {
+                wallSpeedRetained = Speed.x;
+                wallSpeedRetentionTimer = WallSpeedRetentionTime;
+            }
         }
 
         private void OnCollideV(CollisionData data)
@@ -1080,14 +1111,17 @@ namespace myd.celeste.demo
                 {
                     target = ClimbSlipSpeed;
                 }
+                    
 
                 //Set Speed
                 Speed.y = Mathf.MoveTowards(Speed.y, target, ClimbAccel * Time.deltaTime);
             }
-            
+
             ////Down Limit
-            if (InputManager.MoveY.Value != 1 && Speed.y > 0 && !ColliderUtil.CollideCheck(mCollider, (Vector2)this.transform.position + new Vector2((int)Facing, 1), PLATFORM_MASK))
+            if (InputManager.MoveY.Value != 1 && Speed.y > 0 && !ColliderUtil.CollideCheck(mCollider, (Vector2)this.transform.position + new Vector2((int)Facing, -1), PLATFORM_MASK))
+            {
                 Speed.y = 0;
+            }
 
             ////Stamina
             if (climbNoMoveTimer <= 0)
@@ -1185,11 +1219,11 @@ namespace myd.celeste.demo
             Debug.Log("Enter[Normal]");
             //Input.Rumble(RumbleStrength.Medium, RumbleLength.Short);
 
-            //for (int i = 0; i < ClimbCheckDist; i++)
-            //    if (!ColliderUtil.CollideCheck((Vector2)this.transform.position + Vector2.right * (int)Facing, PLATFORM_MASK))
-            //        this.transform.position = this.transform.position + Vector3.right * (int)Facing;
-            //    else
-            //        break;
+            for (int i = 0; i < ClimbCheckDist; i++)
+                if (!CollideCheck((Vector2)this.transform.position + Vector2.right * (int)Facing))
+                    this.transform.position = this.transform.position + Vector3.right * (int)Facing;
+                else
+                    break;
 
             //// tell the thing we grabbed it
             //var platform = SurfaceIndex.GetPlatformByPriority(CollideAll<Solid>(Position + Vector2.UnitX * (int)Facing, temp));
@@ -1221,6 +1255,14 @@ namespace myd.celeste.demo
             Dashes = Math.Max(0, Dashes - 1);
             InputManager.Dash.ConsumeBuffer();
             return StDash;
+        }
+
+        public bool DashAttacking
+        {
+            get
+            {
+                return dashAttackTimer > 0 || StateMachine.State == StRedDash;
+            }
         }
 
         public bool CanDash
@@ -1443,36 +1485,34 @@ namespace myd.celeste.demo
         {
             get
             {
-                return true;
-                //if (!Ducking)
-                //    return true;
+                if (!Ducking)
+                    return true;
 
-                //Collider was = Collider;
-                //Collider = normalHitbox;
-                //bool ret = !CollideCheck<Solid>();
-                //Collider = was;
-                //return ret;
+                BoxCollider2D was = mCollider;
+                mCollider = normalHitbox;
+                bool ret = !CollideCheck();
+                mCollider = was;
+                return ret;
             }
         }
         public bool Ducking
         {
             get
             {
-                //return this.Collider == this.duckHitbox || this.Collider == this.duckHurtbox;
-                return false;
+                return this.mCollider == this.duckHitbox || this.mCollider == this.duckHurtbox;
             }
             set
             {
-                //if (value)
-                //{
-                //    this.Collider = (Collider)this.duckHitbox;
-                //    this.hurtbox = this.duckHurtbox;
-                //}
-                //else
-                //{
-                //    this.Collider = (Collider)this.normalHitbox;
-                //    this.hurtbox = this.normalHurtbox;
-                //}
+                if (value)
+                {
+                    this.mCollider = this.duckHitbox;
+                    this.hurtbox = this.duckHurtbox;
+                }
+                else
+                {
+                    this.mCollider = this.normalHitbox;
+                    this.hurtbox = this.normalHurtbox;
+                }
             }
         }
 

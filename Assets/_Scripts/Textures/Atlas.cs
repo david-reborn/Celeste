@@ -177,10 +177,6 @@ public class Atlas
                         for (int index2 = 0; index2 < (int)num2; ++index2)
                         {
                             string atlasPath = binaryReader.ReadString().Replace('\\', '/');
-                            if (atlasPath == "tilesets/dirt")
-                            {
-                                Debug.Log(11);
-                            }
                             short x = binaryReader.ReadInt16();
                             short y = binaryReader.ReadInt16();
                             short w = binaryReader.ReadInt16();
