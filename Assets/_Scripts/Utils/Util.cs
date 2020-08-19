@@ -275,5 +275,42 @@ namespace myd.celeste
             vector2.Normalize();
             return val + vector2 * maxMove;
         }
+
+        public static Vector2 SnappedNormal(this Vector2 vec, float slices)
+        {
+            float num = 6.283185f / slices;
+            return AngleToVector((float)Math.Floor(((double)vec.Angle() + (double)num / 2.0) / (double)num) * num, 1f);
+        }
+
+        public static Vector2 Snapped(this Vector2 vec, float slices)
+        {
+            float num = 6.283185f / slices;
+            return AngleToVector((float)Math.Floor(((double)vec.Angle() + (double)num / 2.0) / (double)num) * num, vec.magnitude);
+        }
+
+        public static float Angle(this Vector2 vector)
+        {
+            return (float)Math.Atan2((double)vector.y, (double)vector.x);
+        }
+
+        public static Vector2 AngleToVector(float angleRadians, float length)
+        {
+            return new Vector2((float)Math.Cos((double)angleRadians) * length, (float)Math.Sin((double)angleRadians) * length);
+        }
+
+        public static float AbsAngleDiff(float radiansA, float radiansB)
+        {
+            return Math.Abs(AngleDiff(radiansA, radiansB));
+        }
+
+        public static float AngleDiff(float radiansA, float radiansB)
+        {
+            float num = radiansB - radiansA;
+            while ((double)num > 3.14159274101257)
+                num -= 6.283185f;
+            while ((double)num <= -3.14159274101257)
+                num += 6.283185f;
+            return num;
+        }
     }
 }

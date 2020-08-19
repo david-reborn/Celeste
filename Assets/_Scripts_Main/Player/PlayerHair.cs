@@ -71,7 +71,7 @@ namespace myd.celeste.demo
             }
         }
         private bool rendered = false;
-        public void Update()
+        public void OnUpdate()
         {
             this.wave += Time.deltaTime * 4f;
 

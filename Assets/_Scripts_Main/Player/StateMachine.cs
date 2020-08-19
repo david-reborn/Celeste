@@ -11,7 +11,7 @@ namespace myd.celeste.demo
         private Func<int>[] updates;
         private Action[] ends;
         private Func<IEnumerator>[] coroutines;
-        //private Coroutine currentCoroutine;
+        private Coroutine currentCoroutine;
         public bool ChangedStates;
         public bool Log;
         public bool Locked;
@@ -25,8 +25,8 @@ namespace myd.celeste.demo
             this.updates = new Func<int>[maxStates];
             this.ends = new Action[maxStates];
             this.coroutines = new Func<IEnumerator>[maxStates];
-            //this.currentCoroutine = new Coroutine(true);
-            //this.currentCoroutine.RemoveOnComplete = false;
+            this.currentCoroutine = new Coroutine(true);
+            this.currentCoroutine.RemoveOnComplete = false;
         }
 
         public void SetCallbacks(int state, Func<int> onUpdate, Func<IEnumerator> coroutine = null, Action begin = null, Action end = null)
@@ -34,7 +34,7 @@ namespace myd.celeste.demo
             this.updates[state] = onUpdate;
             this.begins[state] = begin;
             this.ends[state] = end;
-            //this.coroutines[state] = coroutine;
+            this.coroutines[state] = coroutine;
         }
 
         public void Update()
@@ -45,19 +45,20 @@ namespace myd.celeste.demo
             {
                 this.State = this.updates[this.state]();
             }
-            //bool active = this.currentCoroutine.Active;
-            //if (active)
-            //{
-            //    this.currentCoroutine.Update();
-            //    bool flag2 = !this.ChangedStates && this.Log && this.currentCoroutine.Finished;
-            //    if (flag2)
-            //    {
-            //        Calc.Log(new object[]
-            //        {
-            //            "Finished Coroutine " + this.state
-            //        });
-            //    }
-            //}
+
+            bool active = this.currentCoroutine.Active;
+            if (active)
+            {
+                this.currentCoroutine.Update();
+                bool flag2 = !this.ChangedStates && this.Log && this.currentCoroutine.Finished;
+                if (flag2)
+                {
+                    Debug.Log(new object[]
+                    {
+                        "Finished Coroutine " + this.state
+                    });
+                }
+            }
         }
 
         public int State
@@ -87,14 +88,14 @@ namespace myd.celeste.demo
                         Debug.Log(("Calling Begin " + this.state));
                     this.begins[this.state]();
                 }
-                //if (this.coroutines[this.state] != null)
-                //{
-                //    if (this.Log)
-                //        Debug.Log((object)("Starting Coroutine " + (object)this.state));
-                //    this.currentCoroutine.Replace(this.coroutines[this.state]());
-                //}
-                //else
-                //    this.currentCoroutine.Cancel();
+                if (this.coroutines[this.state] != null)
+                {
+                    if (this.Log)
+                        Debug.Log((object)("Starting Coroutine " + (object)this.state));
+                    this.currentCoroutine.Replace(this.coroutines[this.state]());
+                }
+                else
+                    this.currentCoroutine.Cancel();
             }
         }
     }

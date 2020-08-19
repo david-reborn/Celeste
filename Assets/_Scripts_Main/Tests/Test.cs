@@ -13,7 +13,7 @@ public class Test : MonoBehaviour
     {
         if (Input.GetKeyUp(KeyCode.C))
         {
-            Debug.Log("test:"+ColliderUtil.CollideCheck(testPosition, mask));
+            Debug.Log("test:"+ColliderUtil.CollidePoint(testPosition, mask));
         }
 
         if (Input.GetKeyUp(KeyCode.T))

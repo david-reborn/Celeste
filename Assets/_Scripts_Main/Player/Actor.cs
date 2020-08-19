@@ -6,6 +6,8 @@ namespace myd.celeste.demo
 {
     public class Actor : MonoBehaviour
     {
+        public static LayerMask PLATFORM_MASK;
+
         public bool AllowPushing = true;
         public float LiftSpeedGraceTime = 0.16f;
         //public Collision SquishCallback;
@@ -49,7 +51,7 @@ namespace myd.celeste.demo
                 Collider2D platform1 = ColliderUtil.OverlapBox(mCollider, Vector2.right, (float)num1, 0, Player.PLATFORM_MASK);
                 if (platform1!=null)
                 {
-                    Debug.Log(mCollider.transform.position+"--"+ mCollider.size);
+                    //Debug.Log(mCollider.transform.position+"--"+ mCollider.size);
                     this.movementCounter.x = 0f;
                     bool flag2 = onCollide != null;
                     if (flag2)
@@ -176,5 +178,14 @@ namespace myd.celeste.demo
             }
         }
 
+        protected bool CollideCheck(Vector2 poisition)
+        {
+            return ColliderUtil.CollideCheck(mCollider, poisition, PLATFORM_MASK);
+        }
+
+        protected bool CollideCheck()
+        {
+            return ColliderUtil.CollideCheck(mCollider, this.transform.position, PLATFORM_MASK);
+        }
     }
 }
