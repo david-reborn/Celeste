@@ -9,6 +9,11 @@ public static class RandomUtil
     public static Random Random = new Random();
     private static Stack<Random> randomStack = new Stack<Random>();
 
+    public static bool BetweenInterval(float val, float interval)
+    {
+        return (double)val % ((double)interval * 2.0) > (double)interval;
+    }
+
     public static void PushRandom(int newSeed)
     {
         RandomUtil.randomStack.Push(Random);

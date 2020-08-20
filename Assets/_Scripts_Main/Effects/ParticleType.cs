@@ -78,53 +78,51 @@ namespace myd.celeste.demo
             ParticleType.AllTypes.Add(this);
         }
 
-        //public Particle Create(ref Particle particle, Vector2 position)
-        //{
-        //    return this.Create(ref particle, position, this.Direction);
-        //}
+        public Particle Create(Particle particle, Vector2 position)
+        {
+            return this.Create(particle, position, this.Direction);
+        }
 
-        //public Particle Create(ref Particle particle, Vector2 position, Color color)
-        //{
-        //    return this.Create(ref particle, (Entity)null, position, this.Direction, color);
-        //}
+        public Particle Create(Particle particle, Vector2 position, Color color)
+        {
+            return this.Create(particle, (Entity)null, position, this.Direction, color);
+        }
 
-        //public Particle Create(ref Particle particle, Vector2 position, float direction)
-        //{
-        //    return this.Create(ref particle, (Entity)null, position, direction, this.Color);
-        //}
+        public Particle Create(Particle particle, Vector2 position, float direction)
+        {
+            return this.Create(particle, (Entity)null, position, direction, this.Color);
+        }
 
-        //public Particle Create(
-        //  ref Particle particle,
-        //  Vector2 position,
-        //  Color color,
-        //  float direction)
-        //{
-        //    return this.Create(ref particle, (Entity)null, position, direction, color);
-        //}
+        public Particle Create(Particle particle,
+          Vector2 position,
+          Color color,
+          float direction)
+        {
+            return this.Create(particle, (Entity)null, position, direction, color);
+        }
 
-        //public Particle Create(
-        //  ref Particle particle,
-        //  Entity entity,
-        //  Vector2 position,
-        //  float direction,
-        //  Color color)
-        //{
-        //    particle.Track = entity;
-        //    particle.Type = this;
-        //    particle.Active = true;
-        //    particle.Position = position;
-        //    particle.Source = this.SourceChooser == null ? (this.Source == null ? Draw.Particle : this.Source) : this.SourceChooser.Choose();
-        //    particle.StartSize = (double)this.SizeRange == 0.0 ? (particle.Size = this.Size) : (particle.Size = this.Size - this.SizeRange * 0.5f + RandomUtil.Random.NextFloat(this.SizeRange));
-        //    particle.StartColor = this.ColorMode != ParticleType.ColorModes.Choose ? (particle.Color = color) : (particle.Color = RandomUtil.Random.Choose<Color>(color, this.Color2));
-        //    float angleRadians = (float)((double)direction - (double)this.DirectionRange / 2.0 + (double)RandomUtil.Random.NextFloat() * (double)this.DirectionRange);
-        //    particle.Speed = Util.AngleToVector(angleRadians, RandomUtil.Random.Range(this.SpeedMin, this.SpeedMax));
-        //    particle.StartLife = particle.Life = RandomUtil.Random.Range(this.LifeMin, this.LifeMax);
-        //    particle.Rotation = this.RotationMode != ParticleType.RotationModes.Random ? (this.RotationMode != ParticleType.RotationModes.SameAsDirection ? 0.0f : angleRadians) : RandomUtil.Random.NextAngle();
-        //    particle.Spin = RandomUtil.Random.Range(this.SpinMin, this.SpinMax);
-        //    if (this.SpinFlippedChance)
-        //        particle.Spin *= (float)RandomUtil.Random.Choose<int>(1, -1);
-        //    return particle;
-        //}
+        public Particle Create(Particle particle,
+          Entity entity,
+          Vector2 position,
+          float direction,
+          Color color)
+        {
+            particle.Track = entity;
+            particle.Type = this;
+            particle.Active = true;
+            particle.Position = position;
+            particle.Source = this.SourceChooser == null ? (this.Source == null ? null/*Draw.Particle*/ : this.Source) : this.SourceChooser.Choose();
+            particle.StartSize = (double)this.SizeRange == 0.0 ? (particle.Size = this.Size) : (particle.Size = this.Size - this.SizeRange * 0.5f + RandomUtil.Random.NextFloat(this.SizeRange));
+            particle.StartColor = this.ColorMode != ParticleType.ColorModes.Choose ? (particle.Color = color) : (particle.Color = RandomUtil.Random.Choose<Color>(color, this.Color2));
+            float angleRadians = (float)((double)direction - (double)this.DirectionRange / 2.0 + (double)RandomUtil.Random.NextFloat() * (double)this.DirectionRange);
+            particle.Speed = Util.AngleToVector(angleRadians, RandomUtil.Random.Range(this.SpeedMin, this.SpeedMax));
+            particle.StartLife = particle.Life = RandomUtil.Random.Range(this.LifeMin, this.LifeMax);
+            particle.Rotation = this.RotationMode != ParticleType.RotationModes.Random ? (this.RotationMode != ParticleType.RotationModes.SameAsDirection ? 0.0f : angleRadians) : RandomUtil.Random.NextAngle();
+            particle.Spin = RandomUtil.Random.Range(this.SpinMin, this.SpinMax);
+            if (this.SpinFlippedChance)
+                particle.Spin *= (float)RandomUtil.Random.Choose<int>(1, -1);
+            return particle;
+        }
 
         public enum ColorModes
         {

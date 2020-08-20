@@ -9,21 +9,21 @@ namespace myd.celeste.demo
 {
     public static class Dust
     {
-        //public static void Burst(
-        //  Vector2 position,
-        //  float direction,
-        //  int count = 1,
-        //  ParticleType particleType = null)
-        //{
-        //    if (particleType == null)
-        //        particleType = ParticleTypes.Dust;
-        //    Vector2 vector = Util.AngleToVector(direction - 1.570796f, 4f);
-        //    vector.x = Math.Abs((float)vector.x);
-        //    vector.y = Math.Abs((float)vector.y);
-        //    Level scene = Engine.Scene as Level;
-        //    for (int index = 0; index < count; ++index)
-        //        scene.Particles.Emit(particleType, Vector2.op_Addition(position, Calc.Random.Range(Vector2.op_UnaryNegation(vector), vector)), direction);
-        //}
+        public static void Burst(Vector2 position, float direction, int count = 1, ParticleType particleType = null)
+        {
+            if (particleType == null)
+                particleType = ParticleTypes.Dust;
+            Vector2 vector = Util.AngleToVector(direction - 1.570796f, 4f);
+            vector.x = Math.Abs((float)vector.x);
+            vector.y = Math.Abs((float)vector.y);
+            //Level scene = Engine.Scene as Level;
+            for (int index = 0; index < count; ++index)
+            {
+                //创建N个粒子，进行发射
+
+            }
+            //    scene.Particles.Emit(particleType, Vector2.op_Addition(position, Calc.Random.Range(Vector2.op_UnaryNegation(vector), vector)), direction);
+        }
 
         //public static void BurstFG(
         //  Vector2 position,
