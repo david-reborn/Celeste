@@ -7,6 +7,43 @@ using UnityEngine;
 
 namespace myd.celeste.demo
 {
+    /// <summary>
+    /// 粒子系统
+    /// </summary>
+    public class ParticleController : MonoBehaviour
+    {
+        public static ParticleController instance;
+        public Particle particlePrefab;
+        public ParticleSystem2D Particles;
+        public ParticleSystem2D ParticlesBG;
+        public ParticleSystem2D ParticlesFG;
+        public void Awake()
+        {
+            instance = this;
+            Particles.Init(100, particlePrefab);
+            ParticlesBG.Init(100, particlePrefab);
+            ParticlesFG.Init(100, particlePrefab);
+        }
+
+        //初始化粒子配置
+        public void Start()
+        {
+            ParticleTypes.Load();
+        }
+
+        public void Update()
+        {
+            if (Input.GetKeyUp(KeyCode.A))
+            {
+                Dust.Burst(Vector2.zero, Util.Angle(Vector2.up), 8);
+            }
+            if (Input.GetKeyUp(KeyCode.S))
+            {
+                CameraController.instance.DirectionalShake(Vector2.up, 0.2f);
+            }
+        }
+    }
+
     public class ParticleTypes
     {
         public static ParticleType Dust;

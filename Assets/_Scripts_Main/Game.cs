@@ -27,15 +27,15 @@ namespace myd.celeste.demo
         private void Start()
         {
             Gfx.SpriteBank = new SpriteBank(Gfx.Game, Path.Combine("Graphics", "Sprites.xml"));
-            PlayerSprite.ClearFramesMetadata();
-            PlayerSprite.CreateFramesMetadata("player");
-            PlayerSprite.CreateFramesMetadata("player_no_backpack");
-            PlayerSprite.CreateFramesMetadata("badeline");
-            PlayerSprite.CreateFramesMetadata("player_badeline");
-            PlayerSprite.CreateFramesMetadata("player_playback");
-            Player playerPrefab = Resources.Load<Player>("Player");
-            this.player = Instantiate<Player>(playerPrefab);
-            this.player.Load(Vector2.zero, PlayerSpriteMode.Madeline);
+            //PlayerSprite.ClearFramesMetadata();
+            //PlayerSprite.CreateFramesMetadata("player");
+            //PlayerSprite.CreateFramesMetadata("player_no_backpack");
+            //PlayerSprite.CreateFramesMetadata("badeline");
+            //PlayerSprite.CreateFramesMetadata("player_badeline");
+            //PlayerSprite.CreateFramesMetadata("player_playback");
+            //Player playerPrefab = Resources.Load<Player>("Player");
+            //this.player = Instantiate<Player>(playerPrefab);
+            //this.player.Load(Vector2.zero, PlayerSpriteMode.Madeline);
         }
 
         public void Draw(MTexture mTexture, GameObject parent, Vector2 position, Color color, Vector2 scale)

@@ -1540,5 +1540,11 @@ namespace myd.celeste.demo
         //{
         //    Gizmos.DrawLine();
         //}
+
+        private void CreateTrail()
+        {
+
+            //TrailManager.Add(this, wasDashB ? NormalHairColor : UsedHairColor);
+        }
     }
 }

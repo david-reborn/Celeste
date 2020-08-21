@@ -109,7 +109,6 @@ namespace myd.celeste.demo
         {
             particle.Track = entity;
             particle.Type = this;
-            particle.Active = true;
             particle.Position = position;
             particle.Source = this.SourceChooser == null ? (this.Source == null ? null/*Draw.Particle*/ : this.Source) : this.SourceChooser.Choose();
             particle.StartSize = (double)this.SizeRange == 0.0 ? (particle.Size = this.Size) : (particle.Size = this.Size - this.SizeRange * 0.5f + RandomUtil.Random.NextFloat(this.SizeRange));
